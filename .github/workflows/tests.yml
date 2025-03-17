@@ -77,11 +77,19 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Install Dusk
-        run: php artisan dusk:install
+      - name: Register Dusk Service Provider
+        run: |
+          composer require --dev laravel/dusk
+          php artisan vendor:publish --provider="Laravel\Dusk\DuskServiceProvider"
+          mkdir -p tests/Browser/screenshots tests/Browser/console
 
-      - name: Upgrade Chrome Driver
-        run: php artisan dusk:chrome-driver --detect
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install ChromeDriver
+        run: php artisan dusk:chrome-driver
 
       - name: Start Chrome Driver
         run: ./vendor/laravel/dusk/bin/chromedriver-linux &
