@@ -1,10 +1,33 @@
-<script setup>
+<script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { PageProps } from '@inertiajs/core';
 
-defineProps({
-    communities: Object,
-});
+interface Community {
+    id: number;
+    name: string;
+    description: string;
+    members_count: number;
+}
+
+interface PaginatedData<T> {
+    data: T[];
+    prev_page_url: string | null;
+    next_page_url: string | null;
+}
+
+interface Props {
+    communities: PaginatedData<Community>;
+}
+
+defineProps<Props>();
+
+// Make $page available in the template
+declare module '@vue/runtime-core' {
+    interface ComponentCustomProperties {
+        $page: PageProps;
+    }
+}
 </script>
 
 <template>

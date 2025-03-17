@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
-const props = defineProps({
+defineProps({
     community: Object,
     posts: Object,
     isMember: Boolean,
