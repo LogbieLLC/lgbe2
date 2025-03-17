@@ -77,6 +77,9 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
+      - name: Install Dusk
+        run: php artisan dusk:install
+
       - name: Upgrade Chrome Driver
         run: php artisan dusk:chrome-driver --detect
 
