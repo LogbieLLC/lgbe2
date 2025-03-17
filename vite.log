@@ -1,0 +1,20 @@
+nohup: ignoring input
+
+> dev
+> vite --host=0.0.0.0 --port=55332
+
+
+  VITE v6.2.0  ready in 221 ms
+
+  ➜  Local:   http://localhost:55332/
+  ➜  Network: http://172.17.0.3:55332/
+
+  LARAVEL v12.2.0  plugin v1.2.0
+
+  ➜  APP_URL: http://localhost
+8:19:13 AM [vite] full reload routes/api.php
+8:19:24 AM [vite] full reload routes/web.php
+8:23:32 AM [vite] full reload routes/web.php
+8:23:37 AM [vite] full reload routes/web.php
+8:23:42 AM [vite] full reload routes/api.php
+8:23:48 AM [vite] full reload routes/api.php
