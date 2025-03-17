@@ -13,8 +13,19 @@ echo "========================================"
 
 # Ensure Chrome driver is running
 echo -e "${YELLOW}Starting Chrome driver...${NC}"
+# Kill any existing Chrome processes
+pkill -f chrome || true
+pkill -f chromedriver || true
+sleep 2
+
+# Install and start ChromeDriver
 php artisan dusk:chrome-driver --detect
-php artisan dusk:chrome-driver
+# Start ChromeDriver in the background
+./vendor/laravel/dusk/bin/chromedriver-linux > /dev/null 2>&1 &
+CHROMEDRIVER_PID=$!
+echo -e "${YELLOW}Started ChromeDriver with PID: $CHROMEDRIVER_PID${NC}"
+# Wait for ChromeDriver to start
+sleep 3
 
 # Clear previous screenshots
 echo -e "${YELLOW}Clearing previous screenshots...${NC}"

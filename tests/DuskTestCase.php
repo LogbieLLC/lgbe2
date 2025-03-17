@@ -81,7 +81,49 @@ abstract class DuskTestCase extends BaseTestCase
     public static function prepare(): void
     {
         if (! static::runningInSail()) {
-            static::startChromeDriver(['--port=9515']);
+            // Kill any existing ChromeDriver and Chrome processes
+            if (PHP_OS_FAMILY === 'Linux') {
+                exec('pkill -f chromedriver');
+                exec('pkill -f chrome');
+            } elseif (PHP_OS_FAMILY === 'Darwin') {
+                exec('pkill -f chromedriver');
+                exec('pkill -f "Google Chrome"');
+            } elseif (PHP_OS_FAMILY === 'Windows') {
+                exec('taskkill /F /IM chromedriver.exe >nul 2>&1');
+                exec('taskkill /F /IM chrome.exe >nul 2>&1');
+            }
+            
+            // Wait for processes to fully terminate
+            sleep(2);
+            
+            // Start ChromeDriver directly using exec instead of the Laravel Dusk helper
+            // This gives us more control over the process
+            if (PHP_OS_FAMILY === 'Windows') {
+                pclose(popen('start /B vendor\\laravel\\dusk\\bin\\chromedriver-win.exe', 'r'));
+            } elseif (PHP_OS_FAMILY === 'Darwin') {
+                exec('vendor/laravel/dusk/bin/chromedriver-mac > /dev/null 2>&1 &');
+            } else {
+                exec('vendor/laravel/dusk/bin/chromedriver-linux > /dev/null 2>&1 &');
+            }
+            
+            // Wait for ChromeDriver to be ready
+            sleep(3);
+            
+            // Verify ChromeDriver is running
+            $running = false;
+            if (PHP_OS_FAMILY === 'Linux') {
+                exec('pgrep -f chromedriver', $output);
+                $running = !empty($output);
+            }
+            
+            if (!$running) {
+                echo "Warning: ChromeDriver may not be running properly. Starting manually...\n";
+                // Try one more time with the Laravel Dusk helper
+                static::startChromeDriver(['--port=9515']);
+                sleep(2);
+            } else {
+                echo "ChromeDriver started successfully.\n";
+            }
         }
     }
     
@@ -213,6 +255,7 @@ abstract class DuskTestCase extends BaseTestCase
             '--user-data-dir=' . $userDataDir,
             '--no-sandbox', // Often needed in CI environments
             '--disable-dev-shm-usage', // Helps with memory issues in CI
+            '--remote-debugging-port=9222', // Add remote debugging port
         ]);
         
         // Add headless arguments if not disabled
@@ -225,8 +268,11 @@ abstract class DuskTestCase extends BaseTestCase
         
         $options->addArguments($chromeArguments->all());
 
+        // Use a fixed driver URL for consistency
+        $driverUrl = 'http://localhost:9515';
+
         return RemoteWebDriver::create(
-            $_ENV['DUSK_DRIVER_URL'] ?? env('DUSK_DRIVER_URL') ?? 'http://localhost:9515',
+            $driverUrl,
             DesiredCapabilities::chrome()->setCapability(
                 ChromeOptions::CAPABILITY, $options
             )
