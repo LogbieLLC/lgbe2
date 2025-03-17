@@ -93,7 +93,7 @@ jobs:
 
       - name: Upload Screenshots
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dusk-screenshots
           path: tests/Browser/screenshots
@@ -101,7 +101,7 @@ jobs:
 
       - name: Upload Console Logs
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dusk-console
           path: tests/Browser/console
