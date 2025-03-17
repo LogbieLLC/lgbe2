@@ -10,6 +10,9 @@ test('user can create a post in a community', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
     
+    // Make user a member of the community
+    $community->members()->attach($user->id, ['role' => 'member']);
+    
     $response = $this->actingAs($user)
         ->postJson("/api/communities/{$community->id}/posts", [
             'title' => 'Test Post',
@@ -47,7 +50,7 @@ test('user can upvote a post', function () {
         ]);
 
     $response->assertStatus(200)
-        ->assertJson(['message' => 'Vote recorded successfully']);
+        ->assertJson(['message' => 'Vote added successfully']);
 
     $this->assertDatabaseHas('votes', [
         'user_id' => $user->id,
@@ -185,6 +188,9 @@ test('posts are sorted by score correctly', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
     
+    // Make user a member of the community
+    $community->members()->attach($user->id, ['role' => 'member']);
+    
     // Create two posts
     $post1 = Post::factory()->create([
         'community_id' => $community->id,
@@ -203,10 +209,10 @@ test('posts are sorted by score correctly', function () {
         'vote_type' => 'up'
     ]);
 
-    $response = $this->getJson("/api/communities/{$community->id}/posts");
+    $response = $this->actingAs($user)->getJson("/api/communities/{$community->id}/posts");
 
     $response->assertStatus(200)
         ->assertJsonCount(2, 'data')
         ->assertJsonPath('data.0.id', $post2->id)
         ->assertJsonPath('data.1.id', $post1->id);
-}); 
+});

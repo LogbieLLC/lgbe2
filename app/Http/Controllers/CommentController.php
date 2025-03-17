@@ -9,13 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum')->except(['index', 'show']);
-    }
     
     /**
      * Display a listing of the resource.
@@ -85,7 +78,9 @@ class CommentController extends Controller
      */
     public function update(Request $request, Comment $comment)
     {
-        $this->authorize('update', $comment);
+        if (Auth::id() !== $comment->user_id) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
         
         $validated = $request->validate([
             'content' => 'required|string|max:10000',
@@ -101,7 +96,9 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
-        $this->authorize('delete', $comment);
+        if (Auth::id() !== $comment->user_id) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
         
         $comment->delete();
         

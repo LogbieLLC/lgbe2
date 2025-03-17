@@ -10,20 +10,17 @@ use Illuminate\Support\Facades\Auth;
 
 class BanController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
     
     /**
      * Display a listing of the resource.
      */
     public function index(Community $community)
     {
-        $this->authorize('moderate', $community);
+        // Check if user is a moderator
+        $isModerator = $community->moderators()->where('user_id', Auth::id())->exists();
+        if (!$isModerator) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
         
         $bans = $community->bans()
             ->with(['user', 'moderator'])
@@ -37,7 +34,11 @@ class BanController extends Controller
      */
     public function store(Request $request, Community $community, User $user)
     {
-        $this->authorize('moderate', $community);
+        // Check if user is a moderator
+        $isModerator = $community->moderators()->where('user_id', Auth::id())->exists();
+        if (!$isModerator) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
         
         // Check if the user is already banned
         $existingBan = $community->bans()->where('user_id', $user->id)->first();
@@ -79,7 +80,11 @@ class BanController extends Controller
      */
     public function show(Community $community, Ban $ban)
     {
-        $this->authorize('moderate', $community);
+        // Check if user is a moderator
+        $isModerator = $community->moderators()->where('user_id', Auth::id())->exists();
+        if (!$isModerator) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
         
         if ($ban->community_id !== $community->id) {
             return response()->json(['message' => 'Ban does not belong to this community'], 404);
@@ -95,7 +100,11 @@ class BanController extends Controller
      */
     public function update(Request $request, Community $community, Ban $ban)
     {
-        $this->authorize('moderate', $community);
+        // Check if user is a moderator
+        $isModerator = $community->moderators()->where('user_id', Auth::id())->exists();
+        if (!$isModerator) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
         
         if ($ban->community_id !== $community->id) {
             return response()->json(['message' => 'Ban does not belong to this community'], 404);
@@ -116,7 +125,11 @@ class BanController extends Controller
      */
     public function destroy(Community $community, User $user)
     {
-        $this->authorize('moderate', $community);
+        // Check if user is a moderator
+        $isModerator = $community->moderators()->where('user_id', Auth::id())->exists();
+        if (!$isModerator) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
         
         $ban = $community->bans()->where('user_id', $user->id)->first();
         

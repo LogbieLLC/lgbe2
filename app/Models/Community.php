@@ -35,6 +35,7 @@ class Community extends Model
     public function members()
     {
         return $this->belongsToMany(User::class)
+            ->using(CommunityUser::class)
             ->withPivot('role')
             ->withTimestamps();
     }
@@ -45,6 +46,7 @@ class Community extends Model
     public function moderators()
     {
         return $this->belongsToMany(User::class)
+            ->using(CommunityUser::class)
             ->wherePivot('role', 'moderator')
             ->withTimestamps();
     }

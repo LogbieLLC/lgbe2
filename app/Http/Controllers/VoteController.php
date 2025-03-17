@@ -12,13 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
     
     /**
      * Vote on a post.

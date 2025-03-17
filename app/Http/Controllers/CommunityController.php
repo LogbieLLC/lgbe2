@@ -9,13 +9,6 @@ use Inertia\Inertia;
 
 class CommunityController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum')->except(['index', 'show']);
-    }
     
     /**
      * Display a listing of the resource.
@@ -45,7 +38,7 @@ class CommunityController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:communities',
+            'name' => 'required|string|min:3|max:255|unique:communities',
             'description' => 'required|string|max:1000',
             'rules' => 'nullable|string|max:5000',
         ]);
@@ -53,12 +46,16 @@ class CommunityController extends Controller
         $community = Community::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
-            'rules' => $validated['rules'],
+            'rules' => $validated['rules'] ?? '',
             'created_by' => Auth::id(),
         ]);
         
         // Add the creator as a moderator
         $community->members()->attach(Auth::id(), ['role' => 'moderator']);
+        
+        if ($request->expectsJson()) {
+            return response()->json($community, 201);
+        }
         
         return redirect()->route('communities.show', $community)
             ->with('success', 'Community created successfully!');
@@ -99,7 +96,9 @@ class CommunityController extends Controller
      */
     public function edit(Community $community)
     {
-        $this->authorize('update', $community);
+        if (Auth::id() !== $community->created_by && !$community->moderators()->where('user_id', Auth::id())->exists()) {
+            abort(403, 'Unauthorized action');
+        }
         
         return Inertia::render('Communities/Edit', [
             'community' => $community,
@@ -111,7 +110,12 @@ class CommunityController extends Controller
      */
     public function update(Request $request, Community $community)
     {
-        $this->authorize('update', $community);
+        if (Auth::id() !== $community->created_by && !$community->moderators()->where('user_id', Auth::id())->exists()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized action'], 403);
+            }
+            abort(403, 'Unauthorized action');
+        }
         
         $validated = $request->validate([
             'description' => 'required|string|max:1000',
@@ -119,6 +123,10 @@ class CommunityController extends Controller
         ]);
         
         $community->update($validated);
+        
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Community updated successfully']);
+        }
         
         return redirect()->route('communities.show', $community)
             ->with('success', 'Community updated successfully!');
@@ -129,9 +137,18 @@ class CommunityController extends Controller
      */
     public function destroy(Community $community)
     {
-        $this->authorize('delete', $community);
+        if (Auth::id() !== $community->created_by) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized action'], 403);
+            }
+            abort(403, 'Unauthorized action');
+        }
         
         $community->delete();
+        
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Community deleted successfully']);
+        }
         
         return redirect()->route('communities.index')
             ->with('success', 'Community deleted successfully!');
@@ -145,10 +162,10 @@ class CommunityController extends Controller
         // Check if user is already a member
         if (!$community->members()->where('user_id', Auth::id())->exists()) {
             $community->members()->attach(Auth::id(), ['role' => 'member']);
-            return response()->json(['message' => 'Joined community successfully']);
+            return response()->json(['message' => 'Successfully joined community']);
         }
         
-        return response()->json(['message' => 'Already a member of this community'], 409);
+        return response()->json(['message' => 'Already a member of this community'], 400);
     }
     
     /**

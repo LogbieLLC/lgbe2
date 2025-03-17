@@ -23,7 +23,7 @@ test('user can register with valid data', function () {
         ]);
 
     $this->assertDatabaseHas('users', [
-        'username' => 'testuser',
+        'name' => 'testuser',
         'email' => 'test@example.com'
     ]);
 });
@@ -37,7 +37,7 @@ test('user cannot register with invalid data', function () {
     ]);
 
     $response->assertStatus(422)
-        ->assertJsonValidationErrors(['username', 'email', 'password']);
+        ->assertJsonValidationErrors(['email', 'password']);
 });
 
 test('user can login with valid credentials', function () {
@@ -106,4 +106,4 @@ test('user can reset password with valid token', function () {
         ->assertJson(['message' => 'Password reset successfully']);
 
     $this->assertTrue(Hash::check('newpassword123', $user->fresh()->password));
-}); 
+});

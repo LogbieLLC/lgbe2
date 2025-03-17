@@ -10,13 +10,6 @@ use Inertia\Inertia;
 
 class PostController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum')->except(['index', 'show']);
-    }
     
     /**
      * Display a listing of the resource.
@@ -26,10 +19,14 @@ class PostController extends Controller
         $posts = $community->posts()
             ->with(['user', 'community'])
             ->withCount(['comments', 'votes'])
-            ->orderByDesc('created_at')
-            ->paginate(15);
+            ->get()
+            ->sortByDesc(function ($post) {
+                return $post->score;
+            })
+            ->values()
+            ->take(15);
             
-        return response()->json($posts);
+        return response()->json(['data' => $posts]);
     }
 
     /**
@@ -115,7 +112,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        $this->authorize('update', $post);
+        if (Auth::id() !== $post->user_id) {
+            abort(403, 'Unauthorized action');
+        }
         
         return Inertia::render('Posts/Edit', [
             'post' => $post,
@@ -128,7 +127,12 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        $this->authorize('update', $post);
+        if (Auth::id() !== $post->user_id) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized action'], 403);
+            }
+            abort(403, 'Unauthorized action');
+        }
         
         $validated = $request->validate([
             'title' => 'required|string|max:300',
@@ -137,7 +141,7 @@ class PostController extends Controller
         
         $post->update($validated);
         
-        if ($request->wantsJson()) {
+        if ($request->expectsJson()) {
             return response()->json($post);
         }
         
@@ -150,16 +154,43 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        $this->authorize('delete', $post);
+        if (Auth::id() !== $post->user_id) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized action'], 403);
+            }
+            abort(403, 'Unauthorized action');
+        }
         
         $community = $post->community;
         $post->delete();
         
-        if (request()->wantsJson()) {
+        if (request()->expectsJson()) {
             return response()->json(['message' => 'Post deleted successfully']);
         }
         
         return redirect()->route('communities.show', $community)
             ->with('success', 'Post deleted successfully!');
+    }
+    
+    /**
+     * Remove a post from a community (moderator action).
+     */
+    public function removeFromCommunity(Community $community, Post $post)
+    {
+        // Check if user is a moderator of the community
+        $isModerator = $community->moderators()->where('user_id', Auth::id())->exists();
+        
+        if (!$isModerator) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
+        
+        // Check if post belongs to the community
+        if ($post->community_id !== $community->id) {
+            return response()->json(['message' => 'Post does not belong to this community'], 404);
+        }
+        
+        $post->delete();
+        
+        return response()->json(['message' => 'Post removed successfully']);
     }
 }
