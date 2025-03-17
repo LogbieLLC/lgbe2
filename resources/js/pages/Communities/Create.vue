@@ -5,7 +5,6 @@ import InputError from '@/components/InputError.vue';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import TextArea from '@/components/TextArea.vue';
 
 const form = useForm({
     name: '',
@@ -47,12 +46,13 @@ const submit = () => {
 
                             <div class="mb-4">
                                 <Label for="description">Description</Label>
-                                <TextArea
+                                <textarea
                                     id="description"
-                                    class="mt-1 block w-full"
+                                    class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                     v-model="form.description"
                                     required
-                                />
+                                    rows="4"
+                                ></textarea>
                                 <InputError class="mt-2" :message="form.errors.description" />
                                 <p class="mt-1 text-sm text-gray-500">
                                     Briefly describe your community.
@@ -61,12 +61,12 @@ const submit = () => {
 
                             <div class="mb-4">
                                 <Label for="rules">Community Rules</Label>
-                                <TextArea
+                                <textarea
                                     id="rules"
-                                    class="mt-1 block w-full"
+                                    class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                     v-model="form.rules"
                                     rows="6"
-                                />
+                                ></textarea>
                                 <InputError class="mt-2" :message="form.errors.rules" />
                                 <p class="mt-1 text-sm text-gray-500">
                                     Set guidelines for your community. This is optional but recommended.
