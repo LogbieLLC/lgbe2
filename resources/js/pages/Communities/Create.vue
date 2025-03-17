@@ -1,11 +1,11 @@
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import TextArea from '@/Components/TextArea.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import InputError from '@/components/InputError.vue';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import TextArea from '@/components/TextArea.vue';
 
 const form = useForm({
     name: '',
@@ -21,10 +21,8 @@ const submit = () => {
 <template>
     <Head title="Create Community" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Create Community</h2>
-        </template>
+    <AppLayout>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-6">Create Community</h2>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -32,8 +30,8 @@ const submit = () => {
                     <div class="p-6 text-gray-900">
                         <form @submit.prevent="submit">
                             <div class="mb-4">
-                                <InputLabel for="name" value="Community Name" />
-                                <TextInput
+                                <Label for="name">Community Name</Label>
+                                <Input
                                     id="name"
                                     type="text"
                                     class="mt-1 block w-full"
@@ -48,7 +46,7 @@ const submit = () => {
                             </div>
 
                             <div class="mb-4">
-                                <InputLabel for="description" value="Description" />
+                                <Label for="description">Description</Label>
                                 <TextArea
                                     id="description"
                                     class="mt-1 block w-full"
@@ -62,7 +60,7 @@ const submit = () => {
                             </div>
 
                             <div class="mb-4">
-                                <InputLabel for="rules" value="Community Rules" />
+                                <Label for="rules">Community Rules</Label>
                                 <TextArea
                                     id="rules"
                                     class="mt-1 block w-full"
@@ -76,14 +74,14 @@ const submit = () => {
                             </div>
 
                             <div class="flex items-center justify-end mt-4">
-                                <PrimaryButton class="ml-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                                <Button class="ml-4" :disabled="form.processing">
                                     Create Community
-                                </PrimaryButton>
+                                </Button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AppLayout>
 </template>

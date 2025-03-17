@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 defineProps({
     communities: Object,
@@ -10,10 +10,8 @@ defineProps({
 <template>
     <Head title="Communities" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Communities</h2>
-        </template>
+    <AppLayout>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-6">Communities</h2>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -72,5 +70,5 @@ defineProps({
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AppLayout>
 </template>

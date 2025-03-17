@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 const props = defineProps({
     community: Object,
@@ -16,39 +16,37 @@ const showRules = ref(false);
 <template>
     <Head :title="'r/' + community.name" />
 
-    <AuthenticatedLayout>
-        <template #header>
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">r/{{ community.name }}</h2>
-                <div class="flex space-x-2">
-                    <Link
-                        v-if="$page.props.auth.user && !isMember"
-                        :href="route('communities.join', community)"
-                        method="post"
-                        as="button"
-                        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                    >
-                        Join
-                    </Link>
-                    <Link
-                        v-if="$page.props.auth.user && isMember && !isModerator"
-                        :href="route('communities.leave', community)"
-                        method="post"
-                        as="button"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                    >
-                        Leave
-                    </Link>
-                    <Link
-                        v-if="isModerator"
-                        :href="route('communities.edit', community)"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                    >
-                        Edit Community
-                    </Link>
-                </div>
+    <AppLayout>
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">r/{{ community.name }}</h2>
+            <div class="flex space-x-2">
+                <Link
+                    v-if="$page.props.auth.user && !isMember"
+                    :href="route('communities.join', community)"
+                    method="post"
+                    as="button"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                >
+                    Join
+                </Link>
+                <Link
+                    v-if="$page.props.auth.user && isMember && !isModerator"
+                    :href="route('communities.leave', community)"
+                    method="post"
+                    as="button"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                >
+                    Leave
+                </Link>
+                <Link
+                    v-if="isModerator"
+                    :href="route('communities.edit', community)"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                >
+                    Edit Community
+                </Link>
             </div>
-        </template>
+        </div>
 
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -133,5 +131,5 @@ const showRules = ref(false);
                 </div>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AppLayout>
 </template>
