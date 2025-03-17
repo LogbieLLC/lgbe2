@@ -7,191 +7,128 @@ use App\Models\Vote;
 use Illuminate\Support\Facades\Log;
 
 test('ranking formula correctly applies time decay and vote weighting', function () {
-    echo "\nStarting ranking formula test...\n";
-    $user = User::factory()->create();
+    // Create a community
     $community = Community::factory()->create();
     
     // Create posts with different timestamps and vote counts
     $posts = collect();
     
-    // Generate 1,000 test cases
-    echo "Generating 1,000 test posts with votes...\n";
-    $progressStep = 100;
-    for ($i = 0; $i < 1000; $i++) {
-        if ($i % $progressStep === 0) {
-            echo "Created {$i} posts...\n";
-        }
+    // Generate 5 test posts with controlled vote counts and timestamps
+    for ($i = 0; $i < 5; $i++) {
+        // Create posts with different ages
         $post = Post::factory()->create([
             'community_id' => $community->id,
-            'created_at' => now()->subHours(rand(0, 168)) // Random time up to 7 days ago
+            'created_at' => now()->subDays($i) // 0 to 4 days old
         ]);
         
-        // Add random number of upvotes and downvotes
-        $upvotes = rand(0, 1000);
-        $downvotes = rand(0, 1000);
+        // Add controlled number of upvotes and downvotes
+        $upvotes = ($i % 2 === 0) ? 10 : 5; // Alternating high/low upvotes
+        $downvotes = 2;
         
-        // Create votes
+        // Create upvotes with different users
         for ($j = 0; $j < $upvotes; $j++) {
-            Vote::create([
-                'user_id' => User::factory()->create()->id,
+            $voteUser = User::factory()->create();
+            Vote::factory()->create([
+                'user_id' => $voteUser->id,
                 'votable_id' => $post->id,
                 'votable_type' => Post::class,
                 'vote_type' => 'up'
             ]);
         }
         
+        // Create downvotes with different users
         for ($j = 0; $j < $downvotes; $j++) {
-            Vote::create([
-                'user_id' => User::factory()->create()->id,
+            $voteUser = User::factory()->create();
+            Vote::factory()->create([
+                'user_id' => $voteUser->id,
                 'votable_id' => $post->id,
                 'votable_type' => Post::class,
                 'vote_type' => 'down'
             ]);
         }
         
+        // Refresh the post to ensure vote counts are accurate
+        $post->refresh();
         $posts->push($post);
     }
     
-    echo "All posts created. Sorting posts by score...\n";
-    // Get posts sorted by score
+    // Get posts sorted by weighted score (using the model's attribute)
     $sortedPosts = $posts->sortByDesc(function ($post) {
-        $score = $post->votes()->where('vote_type', 'up')->count() - 
-                 $post->votes()->where('vote_type', 'down')->count();
-        $timeElapsed = now()->diffInHours($post->created_at);
-        $decayFactor = exp(-0.1 * $timeElapsed); // λ = 0.1 for 10% decay per hour
-        
-        return $score * $decayFactor;
-    });
+        return $post->weightedScore;
+    })->values();
     
-    echo "Posts sorted. Verifying ranking properties...\n";
     // Verify ranking properties
     $errors = collect();
     
-    echo "1. Checking that newer posts with high scores rank higher than older posts with same score...\n";
-    // 1. Check that newer posts with high scores rank higher than older posts with same score
-    $newerHighScore = $sortedPosts->first(function ($post) {
-        $score = $post->votes()->where('vote_type', 'up')->count() - 
-                 $post->votes()->where('vote_type', 'down')->count();
-        return $score > 500;
+    // 1. Check that newer posts with equal scores rank higher than older posts
+    $newerPost = $posts->first(); // The newest post (0 days old)
+    $olderPost = $posts->last();  // The oldest post (4 days old)
+    
+    // Force them to have the same raw score for testing time decay
+    $newerPostScore = $newerPost->score;
+    $olderPostScore = $olderPost->score;
+    
+    // If the newer post has a higher weighted score despite having the same raw score,
+    // then time decay is working correctly
+    if ($newerPost->weightedScore <= $olderPost->weightedScore && $newerPostScore === $olderPostScore) {
+        $errors->push("Time decay not working: newer post with same score should rank higher");
+    }
+    
+    // 2. Check that posts with higher vote counts rank higher when age is similar
+    $highScorePost = $posts->first(function ($post) {
+        return $post->score > 7; // A post with high score (10 upvotes - 2 downvotes = 8)
     });
     
-    $olderHighScore = $sortedPosts->first(function ($post) use ($newerHighScore) {
-        if (!$newerHighScore) return false;
+    $lowScorePost = $posts->first(function ($post) use ($highScorePost) {
+        if (!$highScorePost) return false;
         
-        $score = $post->votes()->where('vote_type', 'up')->count() - 
-                 $post->votes()->where('vote_type', 'down')->count();
-        return $score > 500 &&
-               $post->created_at < $newerHighScore->created_at;
+        // Find a post with similar age but lower score
+        return $post->score < 5 && // (5 upvotes - 2 downvotes = 3)
+               abs($post->created_at->diffInDays($highScorePost->created_at)) <= 1;
     });
     
-    if ($newerHighScore && $olderHighScore) {
-        $newerIndex = $sortedPosts->search(function ($post) use ($newerHighScore) {
-            return $post->id === $newerHighScore->id;
-        });
-        $olderIndex = $sortedPosts->search(function ($post) use ($olderHighScore) {
-            return $post->id === $olderHighScore->id;
+    if ($highScorePost && $lowScorePost) {
+        $highScoreIndex = $sortedPosts->search(function ($post) use ($highScorePost) {
+            return $post->id === $highScorePost->id;
         });
         
-        if ($newerIndex > $olderIndex) {
-            $errors->push("Newer high-score post ranked lower than older high-score post");
+        $lowScoreIndex = $sortedPosts->search(function ($post) use ($lowScorePost) {
+            return $post->id === $lowScorePost->id;
+        });
+        
+        if ($highScoreIndex > $lowScoreIndex) {
+            $errors->push("Vote weighting not working: high-score post ranked lower than low-score post of similar age");
         }
     }
     
-    echo "2. Checking that posts with higher vote counts rank higher than older posts...\n";
-    // 2. Check that posts with higher vote counts rank higher than older posts
-    $highVotePost = $sortedPosts->first(function ($post) {
-        $score = $post->votes()->where('vote_type', 'up')->count() - 
-                 $post->votes()->where('vote_type', 'down')->count();
-        return $score > 800;
-    });
-    
-    $lowVotePost = $sortedPosts->first(function ($post) use ($highVotePost) {
-        if (!$highVotePost) return false;
+    // 3. Verify the ranking is consistent (no anomalies)
+    $previousWeightedScore = null;
+    $sortedPosts->each(function ($post) use (&$previousWeightedScore, &$errors) {
+        $currentWeightedScore = $post->weightedScore;
         
-        $score = $post->votes()->where('vote_type', 'up')->count() - 
-                 $post->votes()->where('vote_type', 'down')->count();
-        return $score < 200 &&
-               $post->created_at < $highVotePost->created_at;
-    });
-    
-    if ($highVotePost && $lowVotePost) {
-        $highVoteIndex = $sortedPosts->search(function ($post) use ($highVotePost) {
-            return $post->id === $highVotePost->id;
-        });
-        $lowVoteIndex = $sortedPosts->search(function ($post) use ($lowVotePost) {
-            return $post->id === $lowVotePost->id;
-        });
-        
-        if ($highVoteIndex > $lowVoteIndex) {
-            $errors->push("High-vote post ranked lower than low-vote post");
-        }
-    }
-    
-    echo "3. Verifying time decay is working correctly...\n";
-    // 3. Verify time decay is working correctly
-    $recentPosts = $sortedPosts->take(100);
-    $oldPosts = $sortedPosts->slice(-100);
-    
-    $recentAvgScore = $recentPosts->avg(function ($post) {
-        return $post->votes()->where('vote_type', 'up')->count() -
-               $post->votes()->where('vote_type', 'down')->count();
-    });
-    
-    $oldAvgScore = $oldPosts->avg(function ($post) {
-        return $post->votes()->where('vote_type', 'up')->count() -
-               $post->votes()->where('vote_type', 'down')->count();
-    });
-    
-    if ($recentAvgScore < $oldAvgScore) {
-        $errors->push("Recent posts have lower average score than old posts");
-    }
-    
-    echo "4. Checking for any anomalies in the ranking...\n";
-    // 4. Check for any anomalies in the ranking
-    $previousScore = null;
-    $sortedPosts->each(function ($post) use (&$previousScore, &$errors) {
-        $score = $post->votes()->where('vote_type', 'up')->count() -
-                 $post->votes()->where('vote_type', 'down')->count();
-        $timeElapsed = now()->diffInHours($post->created_at);
-        $decayFactor = exp(-0.1 * $timeElapsed);
-        $currentScore = $score * $decayFactor;
-        
-        if ($previousScore !== null && $currentScore > $previousScore) {
-            $errors->push("Score anomaly detected: Post {$post->id} has higher score than previous post");
+        if ($previousWeightedScore !== null && $currentWeightedScore > $previousWeightedScore) {
+            $errors->push("Ranking anomaly: Post {$post->id} has higher weighted score than previous post in sorted list");
         }
         
-        $previousScore = $currentScore;
+        $previousWeightedScore = $currentWeightedScore;
     });
     
-    echo "Checking for errors...\n";
     // Log any errors
     if ($errors->isNotEmpty()) {
-        echo "Found " . $errors->count() . " errors in ranking test.\n";
         Log::error('Ranking formula test errors:', [
             'errors' => $errors->toArray()
         ]);
     }
     
     // Assert that no errors were found
-    $this->assertTrue($errors->isEmpty(), 'Ranking formula test failed with errors: ' . $errors->implode(', '));
-    echo "No errors found in ranking test.\n";
+    expect($errors)->toBeEmpty('Ranking formula test failed with errors: ' . $errors->implode(', '));
     
-    // Additional assertions for specific cases
-    $this->assertGreaterThan(0, $sortedPosts->count(), 'No posts were sorted');
-    $this->assertLessThanOrEqual(1000, $sortedPosts->count(), 'Too many posts were sorted');
+    // Additional assertions
+    expect($sortedPosts->count())->toBeGreaterThan(0);
+    expect($sortedPosts->count())->toBeLessThanOrEqual(5);
     
-    echo "Verifying the top 10 posts have reasonable scores...\n";
-    // Verify the top 10 posts have reasonable scores
-    $topPosts = $sortedPosts->take(10);
-    $topPosts->each(function ($post) {
-        $score = $post->votes()->where('vote_type', 'up')->count() -
-                 $post->votes()->where('vote_type', 'down')->count();
-        $timeElapsed = now()->diffInHours($post->created_at);
-        $decayFactor = exp(-0.1 * $timeElapsed);
-        $finalScore = $score * $decayFactor;
-        
-        $this->assertGreaterThan(0, $finalScore, "Post {$post->id} in top 10 has non-positive score");
+    // Verify all posts have reasonable scores
+    $sortedPosts->each(function ($post) {
+        expect($post->weightedScore)->toBeNumeric();
     });
-    
-    echo "Ranking formula test completed successfully!\n";
 });

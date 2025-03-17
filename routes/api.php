@@ -8,6 +8,8 @@ use App\Http\Controllers\BanController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VoteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -55,3 +57,14 @@ Route::post('comments/{comment}/vote', [VoteController::class, 'voteComment'])->
 // Bans
 Route::post('communities/{community}/ban/{user}', [BanController::class, 'store'])->middleware('auth:sanctum');
 Route::delete('communities/{community}/ban/{user}', [BanController::class, 'destroy'])->middleware('auth:sanctum');
+
+// Search
+Route::get('search/communities', [SearchController::class, 'searchCommunities']);
+Route::get('search/posts', [SearchController::class, 'searchPosts']);
+Route::get('search/comments', [SearchController::class, 'searchComments']);
+
+// User Profiles
+Route::get('users/{user}', [UserController::class, 'show']);
+Route::put('users/{user}', [UserController::class, 'update'])->middleware('auth:sanctum');
+Route::get('users/{user}/posts', [UserController::class, 'posts']);
+Route::get('users/{user}/comments', [UserController::class, 'comments']);
