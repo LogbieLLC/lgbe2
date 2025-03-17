@@ -3,19 +3,28 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Config\Repository;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected function setUp(): void
+    /**
+     * Creates the application.
+     *
+     * @return \Illuminate\Foundation\Application
+     */
+    public function createApplication()
     {
-        parent::setUp();
-        
-        // Register the config service if it doesn't exist
-        if (!$this->app->bound('config')) {
-            $this->app->singleton('config', function ($app) {
-                return $app->make(\Illuminate\Config\Repository::class);
+        $app = require __DIR__.'/../bootstrap/app.php';
+
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+        // Explicitly bind the config repository
+        if (!$app->bound('config')) {
+            $app->singleton('config', function ($app) {
+                return new Repository();
             });
         }
+
+        return $app;
     }
 }
