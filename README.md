@@ -1,1 +1,1 @@
-# lgbe2
+# lgbe2 - Social Media Platform
