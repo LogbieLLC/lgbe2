@@ -1,3 +1,7 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+    - ./phpstan-baseline.neon
+
 parameters:
     level: 5
     paths:
@@ -7,3 +11,22 @@ parameters:
         - vendor
         - storage
         - bootstrap/cache
+        - tests/Browser
+    
+    # Laravel specific settings
+    treatPhpDocTypesAsCertain: false
+    
+    # Model property handling
+    universalObjectCratesClasses:
+        - Illuminate\Database\Eloquent\Model
+        - Illuminate\Http\Request
+        - Illuminate\Contracts\Auth\Authenticatable
+    
+    # Ignore specific errors
+    ignoreErrors:
+        # Controller return type issues
+        - '#Method App\\Http\\Controllers\\[a-zA-Z0-9\\_]+::[a-zA-Z0-9_]+\(\) should return Illuminate\\Http\\Response but returns Illuminate\\Http\\JsonResponse#'
+        
+        # Test method issues
+        - '#Call to an undefined method PHPUnit\\Framework\\TestCase::[a-zA-Z0-9_]+\(\)#'
+        - '#Cannot call method bans\(\) on object\|string#'

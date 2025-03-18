@@ -14,6 +14,16 @@ A Reddit-like social media platform built with Laravel and Vue.js.
 
 ## Testing
 
+### Static Analysis with PHPStan
+
+The project uses PHPStan for static code analysis to catch potential bugs and errors:
+
+```bash
+composer phpstan
+```
+
+For more information about the PHPStan configuration, see [phpstan-readme.md](phpstan-readme.md).
+
 ### Feature Tests
 
 The application includes feature tests for various components:
