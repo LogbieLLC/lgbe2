@@ -84,11 +84,18 @@ abstract class DuskTestCase extends BaseTestCase
             // Kill any existing ChromeDriver and Chrome processes
             static::killExistingProcesses();
             
-            // Define the ChromeDriver port
-            $port = 9515;
+            // Define the ChromeDriver port - use a different port to avoid conflicts
+            $port = 4444;
             
-            // Start ChromeDriver with explicit port
-            static::startChromeDriver(['--port=' . $port]);
+            // Don't start ChromeDriver here - we'll use the one started by run-dusk-tests.sh
+            // This avoids conflicts between multiple ChromeDriver instances
+            
+            // Set the driver URL environment variable
+            putenv("DUSK_DRIVER_URL=http://localhost:{$port}");
+            $_ENV['DUSK_DRIVER_URL'] = "http://localhost:{$port}";
+            
+            // Log the driver URL for debugging
+            echo "Setting DUSK_DRIVER_URL to http://localhost:{$port}\n";
             
             // Wait for ChromeDriver to be ready
             sleep(3);
@@ -113,9 +120,6 @@ abstract class DuskTestCase extends BaseTestCase
             } else {
                 echo "ChromeDriver started successfully.\n";
             }
-            
-            // Set the driver URL environment variable
-            putenv("DUSK_DRIVER_URL=http://localhost:{$port}");
         }
     }
     
@@ -244,13 +248,45 @@ abstract class DuskTestCase extends BaseTestCase
         $tempDir = sys_get_temp_dir();
         $userDataDir = $tempDir . '/chrome_test_dirs/dusk_' . uniqid();
         
-        // Ensure the directory exists and is writable
-        if (!file_exists($userDataDir)) {
-            mkdir($userDataDir, 0755, true);
+        // Remove any existing directory with the same name
+        if (file_exists($userDataDir)) {
+            static::recursiveRemoveDirectory($userDataDir);
         }
+        
+        // Ensure the directory exists and is writable
+        mkdir($userDataDir, 0755, true);
         
         // Log the user data directory for debugging
         echo "Using Chrome user data directory: $userDataDir\n";
+        
+        // Find Chrome binary - try multiple possible locations
+        $chromeBinary = null;
+        $possiblePaths = [
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+            '/home/ubuntu/.local/bin/google-chrome',
+            '/opt/google/chrome/chrome'
+        ];
+        
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path)) {
+                $chromeBinary = $path;
+                echo "Found Chrome at: $chromeBinary\n";
+                break;
+            }
+        }
+        
+        if (!$chromeBinary) {
+            // Try to find Chrome using which command
+            exec('which google-chrome', $output);
+            if (!empty($output)) {
+                $chromeBinary = $output[0];
+                echo "Found Chrome at: $chromeBinary\n";
+            } else {
+                echo "Chrome not found. Using default Chrome binary path.\n";
+                $chromeBinary = '/usr/bin/google-chrome-stable';
+            }
+        }
         
         // Verify ChromeDriver is still running before attempting to connect
         $driverUrl = $_ENV['DUSK_DRIVER_URL'] ?? env('DUSK_DRIVER_URL') ?? 'http://localhost:9515';

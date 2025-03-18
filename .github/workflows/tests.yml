@@ -92,15 +92,57 @@ jobs:
         run: php artisan dusk:chrome-driver
 
       - name: Start Chrome Driver
-        run: ./vendor/laravel/dusk/bin/chromedriver-linux &
+        run: |
+          # Use a specific port and verify it's available
+          CHROMEDRIVER_PORT=9515
+          ./vendor/laravel/dusk/bin/chromedriver-linux --port=$CHROMEDRIVER_PORT > /tmp/chromedriver.log 2>&1 &
+          sleep 3
+          
+          # Verify ChromeDriver is running
+          if curl -s http://localhost:$CHROMEDRIVER_PORT/status > /dev/null; then
+            echo "ChromeDriver is running successfully on port $CHROMEDRIVER_PORT"
+          else
+            echo "ChromeDriver failed to start. See log:"
+            cat /tmp/chromedriver.log
+            exit 1
+          fi
 
       - name: Run Laravel Server
         run: php artisan serve --no-reload &
+        
+      - name: Wait for server
+        run: |
+          echo "Waiting for Laravel server to start..."
+          sleep 5
+          curl -s http://127.0.0.1:8000 > /dev/null
+          echo "Laravel server is running"
 
       - name: Run Dusk Tests
         env:
           APP_URL: "http://127.0.0.1:8000"
-        run: php artisan dusk
+          DUSK_DRIVER_URL: "http://localhost:9515"
+        run: |
+          # Create custom phpunit.dusk.xml with explicit configuration
+          cat > phpunit.dusk.xml << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+                  bootstrap="tests/bootstrap.php"
+                  colors="true">
+              <testsuites>
+                  <testsuite name="Browser">
+                      <directory>tests/Browser</directory>
+                  </testsuite>
+              </testsuites>
+              <php>
+                  <env name="APP_ENV" value="testing"/>
+                  <env name="DUSK_DRIVER_URL" value="http://localhost:9515"/>
+              </php>
+          </phpunit>
+          EOF
+          
+          # Run tests with custom configuration
+          php artisan dusk --configuration=phpunit.dusk.xml
 
       - name: Upload Screenshots
         if: failure()

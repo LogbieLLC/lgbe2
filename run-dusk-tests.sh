@@ -37,9 +37,25 @@ sleep 2
 echo -e "${YELLOW}Installing matching ChromeDriver version...${NC}"
 php artisan dusk:chrome-driver --detect
 
-# Define ChromeDriver port
-CHROMEDRIVER_PORT=9515
+# Define ChromeDriver port - use a different port to avoid conflicts
+CHROMEDRIVER_PORT=4444
 echo -e "${YELLOW}Using ChromeDriver port: ${CHROMEDRIVER_PORT}${NC}"
+
+# Install netstat if not available
+if ! command -v netstat &> /dev/null; then
+    echo -e "${YELLOW}Installing net-tools for netstat...${NC}"
+    sudo apt-get update -qq && sudo apt-get install -y net-tools
+fi
+
+# Check if port is already in use
+if command -v netstat &> /dev/null; then
+    PORT_IN_USE=$(netstat -tuln | grep ":${CHROMEDRIVER_PORT} " | wc -l)
+    if [ "$PORT_IN_USE" -gt 0 ]; then
+        echo -e "${RED}Port ${CHROMEDRIVER_PORT} is already in use. Trying to free it...${NC}"
+        sudo fuser -k ${CHROMEDRIVER_PORT}/tcp || true
+        sleep 2
+    fi
+fi
 
 # Start ChromeDriver in the background with explicit port
 echo -e "${YELLOW}Starting ChromeDriver...${NC}"
@@ -48,7 +64,7 @@ if [ "$(uname)" == "Darwin" ]; then
     ./vendor/laravel/dusk/bin/chromedriver-mac --port=${CHROMEDRIVER_PORT} > /dev/null 2>&1 &
 elif [ "$(uname)" == "Linux" ]; then
     # Linux
-    ./vendor/laravel/dusk/bin/chromedriver-linux --port=${CHROMEDRIVER_PORT} > /dev/null 2>&1 &
+    ./vendor/laravel/dusk/bin/chromedriver-linux --port=${CHROMEDRIVER_PORT} > /tmp/chromedriver.log 2>&1 &
 else
     # Windows
     start //B vendor\\laravel\\dusk\\bin\\chromedriver-win.exe --port=${CHROMEDRIVER_PORT}
@@ -88,9 +104,9 @@ export DUSK_DRIVER_URL="http://localhost:${CHROMEDRIVER_PORT}"
 echo -e "${YELLOW}Clearing previous screenshots...${NC}"
 rm -rf tests/Browser/screenshots/*
 
-# Run the tests
+# Run the tests with custom configuration
 echo -e "${YELLOW}Running tests...${NC}"
-php artisan dusk
+php artisan dusk --configuration=phpunit.dusk.xml
 
 # Cleanup ChromeDriver after tests
 echo -e "${YELLOW}Cleaning up ChromeDriver process...${NC}"
