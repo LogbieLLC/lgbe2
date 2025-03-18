@@ -64,12 +64,131 @@ fi
 # Verify GeckoDriver is installed
 echo -e "${YELLOW}Verifying GeckoDriver installation...${NC}"
 if ! command -v geckodriver &> /dev/null; then
-    echo -e "${RED}GeckoDriver not found. Installing GeckoDriver...${NC}"
+    echo -e "${YELLOW}GeckoDriver not found. Installing GeckoDriver...${NC}"
+    
+    # Create temp directory
+    mkdir -p temp
+    cd temp
+    
+    # Set GeckoDriver version
     GECKODRIVER_VERSION="v0.33.0"
-    wget https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
-    tar -xvzf geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
-    sudo mv geckodriver /usr/local/bin/
-    sudo chmod +x /usr/local/bin/geckodriver
+    
+    # Determine system architecture and OS
+    if [ "$(uname)" == "Darwin" ]; then
+        # macOS
+        if [ "$(uname -m)" == "arm64" ]; then
+            # Apple Silicon (M1/M2)
+            GECKODRIVER_ARCHIVE="geckodriver-${GECKODRIVER_VERSION}-macos-aarch64.tar.gz"
+        else
+            # Intel Mac
+            GECKODRIVER_ARCHIVE="geckodriver-${GECKODRIVER_VERSION}-macos.tar.gz"
+        fi
+    else
+        # Linux
+        if [ "$(uname -m)" == "aarch64" ]; then
+            # ARM64 Linux
+            GECKODRIVER_ARCHIVE="geckodriver-${GECKODRIVER_VERSION}-linux-aarch64.tar.gz"
+        else
+            # x86_64 Linux
+            GECKODRIVER_ARCHIVE="geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz"
+        fi
+    fi
+    
+    # Download GeckoDriver
+    echo -e "${YELLOW}Downloading ${GECKODRIVER_ARCHIVE}...${NC}"
+    if command -v wget &> /dev/null; then
+        if ! wget -q "https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/${GECKODRIVER_ARCHIVE}"; then
+            echo -e "${RED}Failed to download GeckoDriver with wget. Please check your internet connection.${NC}"
+            cd ..
+            rm -rf temp
+            exit 1
+        fi
+    elif command -v curl &> /dev/null; then
+        if ! curl -sL -o "${GECKODRIVER_ARCHIVE}" "https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/${GECKODRIVER_ARCHIVE}"; then
+            echo -e "${RED}Failed to download GeckoDriver with curl. Please check your internet connection.${NC}"
+            cd ..
+            rm -rf temp
+            exit 1
+        fi
+    else
+        echo -e "${RED}Neither wget nor curl is installed. Please install one of them.${NC}"
+        cd ..
+        rm -rf temp
+        exit 1
+    fi
+    
+    # Check if download was successful
+    if [ ! -f "${GECKODRIVER_ARCHIVE}" ]; then
+        echo -e "${RED}Download failed. GeckoDriver archive not found.${NC}"
+        echo -e "${YELLOW}Please download manually from:${NC}"
+        echo -e "https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/${GECKODRIVER_ARCHIVE}"
+        echo -e "${YELLOW}Extract the archive and place geckodriver in your PATH.${NC}"
+        cd ..
+        rm -rf temp
+        exit 1
+    fi
+    
+    # Extract GeckoDriver with error handling
+    echo -e "${YELLOW}Extracting GeckoDriver...${NC}"
+    if ! tar -xzf "${GECKODRIVER_ARCHIVE}"; then
+        echo -e "${RED}Failed to extract GeckoDriver archive.${NC}"
+        echo -e "${YELLOW}Trying alternative extraction method...${NC}"
+        
+        # Try unzip as a fallback if available
+        if command -v unzip &> /dev/null; then
+            if [[ "${GECKODRIVER_ARCHIVE}" == *.zip ]]; then
+                unzip -o "${GECKODRIVER_ARCHIVE}"
+                if [ $? -ne 0 ]; then
+                    echo -e "${RED}Failed to extract with unzip.${NC}"
+                    cd ..
+                    rm -rf temp
+                    exit 1
+                else
+                    echo -e "${GREEN}Extraction with unzip successful.${NC}"
+                fi
+            else
+                echo -e "${RED}Archive is not a zip file, cannot use unzip.${NC}"
+                cd ..
+                rm -rf temp
+                exit 1
+            fi
+        else
+            echo -e "${RED}No alternative extraction methods available.${NC}"
+            cd ..
+            rm -rf temp
+            exit 1
+        fi
+    fi
+    
+    # Check if geckodriver binary was extracted
+    if [ ! -f "geckodriver" ]; then
+        echo -e "${RED}Extraction failed. GeckoDriver binary not found.${NC}"
+        cd ..
+        rm -rf temp
+        exit 1
+    fi
+    
+    # Move GeckoDriver to project directory
+    echo -e "${YELLOW}Installing GeckoDriver...${NC}"
+    cd ..
+    chmod +x temp/geckodriver
+    
+    # Try to install globally if we have sudo access, otherwise install locally
+    if command -v sudo &> /dev/null && sudo -n true 2>/dev/null; then
+        echo -e "${YELLOW}Installing GeckoDriver globally...${NC}"
+        sudo mv temp/geckodriver /usr/local/bin/
+    else
+        echo -e "${YELLOW}Installing GeckoDriver locally...${NC}"
+        mv temp/geckodriver ./
+        # Add current directory to PATH for this session
+        export PATH=$PATH:$(pwd)
+    fi
+    
+    # Clean up
+    echo -e "${YELLOW}Cleaning up...${NC}"
+    rm -rf temp
+    
+    echo -e "${GREEN}GeckoDriver installed successfully.${NC}"
 fi
 
 # Start GeckoDriver in the background with explicit port

@@ -7,6 +7,7 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
+use PHPUnit\Framework\Attributes\AfterClass;
 use Tests\Browser\BrowserTestHelpers;
 
 abstract class DuskTestCase extends BaseTestCase
@@ -19,6 +20,9 @@ abstract class DuskTestCase extends BaseTestCase
      * @var bool
      */
     protected $enablesExceptionHandling = true;
+    
+    // Exception and error handlers are now managed by ExceptionHandlerTrait
+    // through the BrowserTestHelpers trait
 
     /**
      * Prepare for Dusk test execution.
@@ -26,9 +30,21 @@ abstract class DuskTestCase extends BaseTestCase
     #[BeforeClass]
     public static function prepare()
     {
+        // Store original exception and error handlers
+        // We'll use the trait's methods during instance setup/teardown instead
+        
         if (!static::runningInSail()) {
             static::startFirefoxDriver();
         }
+    }
+    
+    /**
+     * Clean up after Dusk test execution.
+     */
+    #[AfterClass]
+    public static function cleanup()
+    {
+        // Cleanup is now handled by the trait's methods during instance teardown
     }
 
     /**
@@ -102,9 +118,25 @@ abstract class DuskTestCase extends BaseTestCase
     {
         parent::setUp();
         
+        // Use the ExceptionHandlerTrait to manage exception handlers
+        $this->setUpExceptionHandlers();
+        
         if ($this->enablesExceptionHandling) {
             $this->withExceptionHandling();
         }
+    }
+    
+    /**
+     * Clean up after each test.
+     *
+     * @return void
+     */
+    protected function tearDown(): void
+    {
+        // Use the ExceptionHandlerTrait to restore exception handlers
+        $this->tearDownExceptionHandlers();
+        
+        parent::tearDown();
     }
     
     /**

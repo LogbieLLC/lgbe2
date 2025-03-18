@@ -10,6 +10,8 @@ use PHPUnit\Framework\Attributes\Test;
 
 class RegistrationTest extends DuskTestCase
 {
+    use DatabaseMigrations;
+    
     /**
      * Set up the test environment.
      */
@@ -20,8 +22,17 @@ class RegistrationTest extends DuskTestCase
         // Preserve exception handlers to prevent risky test warnings
         $this->withExceptionHandling();
     }
-
-    use DatabaseMigrations;
+    
+    /**
+     * Clean up after each test.
+     */
+    protected function tearDown(): void
+    {
+        // Make sure we restore exception handling before ending the test
+        $this->withExceptionHandling();
+        
+        parent::tearDown();
+    }
 
     /**
      * Test successful user registration.
@@ -29,7 +40,6 @@ class RegistrationTest extends DuskTestCase
     #[Test]
     public function test_successful_registration(): void
     {
-        $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
                     ->assertSourceHas('<html')
@@ -43,7 +53,6 @@ class RegistrationTest extends DuskTestCase
     #[Test]
     public function test_validation_missing_fields(): void
     {
-        $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
                     ->assertSourceHas('<html')
@@ -57,7 +66,6 @@ class RegistrationTest extends DuskTestCase
     #[Test]
     public function test_validation_password_requirements(): void
     {
-        $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
                     ->assertSourceHas('<html')
@@ -71,7 +79,6 @@ class RegistrationTest extends DuskTestCase
     #[Test]
     public function test_validation_unique_email(): void
     {
-        $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
                     ->assertSourceHas('<html')

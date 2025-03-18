@@ -7,6 +7,8 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 
 trait BrowserTestHelpers
 {
+    use ExceptionHandlerTrait;
+    
     /**
      * Get Firefox WebDriver capabilities with proper configuration.
      *
