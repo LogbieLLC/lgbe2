@@ -8,12 +8,12 @@ import { ChevronsUpDown } from 'lucide-vue-next';
 import UserMenuContent from './UserMenuContent.vue';
 
 const page = usePage<SharedData>();
-const user = page.props.auth.user as User;
+const user = page.props.auth.user as User | null;
 const { isMobile, state } = useSidebar();
 </script>
 
 <template>
-    <SidebarMenu>
+    <SidebarMenu v-if="user">
         <SidebarMenuItem>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
@@ -31,6 +31,13 @@ const { isMobile, state } = useSidebar();
                     <UserMenuContent :user="user" />
                 </DropdownMenuContent>
             </DropdownMenu>
+        </SidebarMenuItem>
+    </SidebarMenu>
+    <SidebarMenu v-else>
+        <SidebarMenuItem>
+            <a href="/login" class="flex items-center px-3 py-2 text-sm font-medium">
+                Login
+            </a>
         </SidebarMenuItem>
     </SidebarMenu>
 </template>

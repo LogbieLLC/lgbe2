@@ -14,7 +14,11 @@ Route::get('/', function () {
 
 // Dashboard
 Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
+    $user = auth()->user();
+    return Inertia::render('Dashboard', [
+        'createdCommunities' => $user->createdCommunities()->with('members:id')->withCount('members')->get(),
+        'moderatedCommunities' => $user->moderatedCommunities()->with('members:id')->withCount('members')->get(),
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Communities
