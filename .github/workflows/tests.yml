@@ -89,10 +89,14 @@ jobs:
           php artisan vendor:publish --provider="Laravel\Dusk\DuskServiceProvider"
           mkdir -p tests/Browser/screenshots tests/Browser/console
 
-      - name: Install Firefox
+      - name: Install Firefox ESR
         run: |
           sudo apt-get update
-          sudo apt-get install -y firefox
+          sudo add-apt-repository -y ppa:mozillateam/ppa
+          sudo apt-get update
+          sudo apt-get install -y firefox-esr
+          echo "Firefox ESR binary path: $(which firefox-esr)"
+          firefox-esr --version
 
       - name: Install Geckodriver
         run: |
@@ -142,6 +146,17 @@ jobs:
           APP_URL: "http://127.0.0.1:8000"
           DUSK_DRIVER_URL: "http://localhost:4444"
         run: |
+          # Create Firefox wrapper script
+          FIREFOX_WRAPPER="/tmp/firefox-wrapper.sh"
+          echo "Creating Firefox wrapper script at ${FIREFOX_WRAPPER}..."
+          cat > ${FIREFOX_WRAPPER} << 'EOF'
+          #!/bin/bash
+          # Firefox wrapper script for Dusk tests
+          exec /usr/bin/firefox-esr "$@"
+          EOF
+          chmod +x ${FIREFOX_WRAPPER}
+          echo "Firefox wrapper script created successfully."
+          
           # Create custom phpunit.dusk.xml with explicit configuration for Firefox
           cat > phpunit.dusk.xml << EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -157,9 +172,14 @@ jobs:
               <php>
                   <env name="APP_ENV" value="testing"/>
                   <env name="DUSK_DRIVER_URL" value="http://localhost:4444"/>
+                  <env name="FIREFOX_BINARY_PATH" value="/usr/bin/firefox-esr"/>
               </php>
           </phpunit>
           EOF
+          
+          # Set environment variable for Firefox binary path
+          export FIREFOX_BINARY_PATH="/usr/bin/firefox-esr"
+          echo "Firefox binary path: ${FIREFOX_BINARY_PATH}"
           
           # Run tests with custom configuration
           php artisan dusk --configuration=phpunit.dusk.xml
