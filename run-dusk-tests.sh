@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to run Laravel Dusk tests with Firefox and GeckoDriver
-# Updated to use Firefox instead of Chrome
+# Updated to match Windows batch file functionality
 
 # Set colors for output
 GREEN='\033[0;32m'
@@ -242,6 +242,19 @@ export DUSK_DRIVER_URL="http://localhost:${GECKODRIVER_PORT}"
 echo -e "${YELLOW}Clearing previous screenshots...${NC}"
 rm -rf tests/Browser/screenshots/*
 
+# Find an available port for the Laravel development server
+echo -e "${YELLOW}Finding available port for Laravel development server...${NC}"
+SERVER_PORT=8000
+while netstat -tuln | grep -q ":$SERVER_PORT "; do
+    SERVER_PORT=$((SERVER_PORT+1))
+    if [ $SERVER_PORT -gt 8020 ]; then
+        echo -e "${RED}No available ports found between 8000 and 8020.${NC}"
+        echo -e "${RED}Please free up a port or modify the script to use a different port range.${NC}"
+        exit 1
+    fi
+done
+echo -e "${YELLOW}Using port ${SERVER_PORT} for Laravel development server${NC}"
+
 # Create custom phpunit.dusk.xml configuration for Firefox
 echo -e "${YELLOW}Creating custom phpunit.dusk.xml configuration...${NC}"
 cat > phpunit.dusk.xml << EOFXML
@@ -249,7 +262,14 @@ cat > phpunit.dusk.xml << EOFXML
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
         bootstrap="tests/bootstrap.php"
-        colors="true">
+        colors="true"
+        backupGlobals="true"
+        backupStaticAttributes="false"
+        convertErrorsToExceptions="true"
+        convertNoticesToExceptions="true"
+        convertWarningsToExceptions="true"
+        processIsolation="false"
+        stopOnFailure="false">
     <testsuites>
         <testsuite name="Browser">
             <directory>tests/Browser</directory>
@@ -258,13 +278,30 @@ cat > phpunit.dusk.xml << EOFXML
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="DUSK_DRIVER_URL" value="http://localhost:${GECKODRIVER_PORT}"/>
+        <env name="APP_URL" value="http://localhost:${SERVER_PORT}"/>
     </php>
 </phpunit>
 EOFXML
 
+# Start Laravel development server in the background
+echo -e "${YELLOW}Starting Laravel development server...${NC}"
+php artisan serve --port=${SERVER_PORT} > server.log 2>&1 &
+SERVER_PID=$!
+echo -e "${YELLOW}Started Laravel development server with PID: ${SERVER_PID}${NC}"
+echo -e "${YELLOW}Waiting for server to start...${NC}"
+sleep 5
+
+# Update the test environment to use the correct port
+export APP_URL="http://localhost:${SERVER_PORT}"
+
 # Run the tests with custom configuration
 echo -e "${YELLOW}Running tests...${NC}"
 php artisan dusk --configuration=phpunit.dusk.xml
+TEST_RESULT=$?
+
+# Stop the Laravel development server
+echo -e "${YELLOW}Stopping Laravel development server...${NC}"
+kill $SERVER_PID 2>/dev/null || true
 
 # Cleanup GeckoDriver after tests
 echo -e "${YELLOW}Cleaning up GeckoDriver process...${NC}"
@@ -278,8 +315,92 @@ else
 fi
 
 # Check if tests passed
-if [ $? -eq 0 ]; then
+if [ $TEST_RESULT -eq 0 ]; then
     echo -e "${GREEN}All tests passed!${NC}"
 else
     echo -e "${RED}Some tests failed. Check the output above for details.${NC}"
+    echo -e "${RED}Screenshots of failed tests are available in tests/Browser/screenshots/${NC}"
 fi
+
+# Generate a simple HTML report
+echo -e "${YELLOW}Generating test report...${NC}"
+
+# Create report directory if it doesn't exist
+mkdir -p tests/Browser/reports/
+
+# Get current date and time
+DATE=$(date "+%Y-%m-%d %H:%M:%S")
+
+# Create HTML report
+cat > tests/Browser/reports/report.html << EOFHTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dusk Test Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .screenshot {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .screenshot img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin-top: 10px;
+        }
+        .timestamp {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Laravel Dusk Test Report</h1>
+        <p class="timestamp">Generated on: ${DATE}</p>
+        
+        <h2>Test Screenshots</h2>
+        <div class="screenshots">
+EOFHTML
+
+# Add screenshots to the report
+for screenshot in tests/Browser/screenshots/*.png; do
+    if [ -f "$screenshot" ]; then
+        filename=$(basename "$screenshot")
+        echo "            <div class=\"screenshot\">" >> tests/Browser/reports/report.html
+        echo "                <h3>${filename}</h3>" >> tests/Browser/reports/report.html
+        echo "                <img src=\"../screenshots/${filename}\" alt=\"${filename}\">" >> tests/Browser/reports/report.html
+        echo "            </div>" >> tests/Browser/reports/report.html
+    fi
+done
+
+# Close the HTML file
+cat >> tests/Browser/reports/report.html << EOFHTML
+        </div>
+    </div>
+</body>
+</html>
+EOFHTML
+
+echo -e "${YELLOW}Test report generated at tests/Browser/reports/report.html${NC}"
+echo "========================================"
+
+exit $TEST_RESULT
