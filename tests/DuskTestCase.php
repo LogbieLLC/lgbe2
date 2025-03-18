@@ -81,8 +81,111 @@ abstract class DuskTestCase extends BaseTestCase
     public static function prepare(): void
     {
         if (! static::runningInSail()) {
-            static::startChromeDriver(['--port=9515']);
+            // Kill any existing ChromeDriver and Chrome processes
+            static::killExistingProcesses();
+            
+            // Define the ChromeDriver port
+            $port = 9515;
+            
+            // Start ChromeDriver with explicit port
+            static::startChromeDriver(['--port=' . $port]);
+            
+            // Wait for ChromeDriver to be ready
+            sleep(3);
+            
+            // Verify ChromeDriver is running
+            if (!static::verifyDriverIsRunning($port)) {
+                echo "Warning: ChromeDriver may not be running properly. Attempting to restart...\n";
+                
+                // Try one more time with a different approach
+                static::killExistingProcesses();
+                
+                // Start ChromeDriver directly
+                static::startChromeDriverManually($port);
+                
+                // Wait and verify again
+                sleep(3);
+                if (!static::verifyDriverIsRunning($port)) {
+                    echo "Error: ChromeDriver failed to start after multiple attempts.\n";
+                } else {
+                    echo "ChromeDriver started successfully on second attempt.\n";
+                }
+            } else {
+                echo "ChromeDriver started successfully.\n";
+            }
+            
+            // Set the driver URL environment variable
+            putenv("DUSK_DRIVER_URL=http://localhost:{$port}");
         }
+    }
+    
+    /**
+     * Kill existing ChromeDriver and Chrome processes.
+     */
+    protected static function killExistingProcesses(): void
+    {
+        echo "Cleaning up existing Chrome processes...\n";
+        
+        if (PHP_OS_FAMILY === 'Linux') {
+            exec('pkill -f chromedriver || true');
+            exec('pkill -f chrome || true');
+        } elseif (PHP_OS_FAMILY === 'Darwin') {
+            exec('pkill -f chromedriver || true');
+            exec('pkill -f "Google Chrome" || true');
+        } elseif (PHP_OS_FAMILY === 'Windows') {
+            exec('taskkill /F /IM chromedriver.exe >nul 2>&1 || true');
+            exec('taskkill /F /IM chrome.exe >nul 2>&1 || true');
+        }
+        
+        // Wait for processes to fully terminate
+        sleep(2);
+    }
+    
+    /**
+     * Start ChromeDriver manually using direct execution.
+     */
+    protected static function startChromeDriverManually(int $port): void
+    {
+        echo "Starting ChromeDriver manually on port {$port}...\n";
+        
+        if (PHP_OS_FAMILY === 'Windows') {
+            pclose(popen("start /B vendor\\laravel\\dusk\\bin\\chromedriver-win.exe --port={$port}", 'r'));
+        } elseif (PHP_OS_FAMILY === 'Darwin') {
+            exec("vendor/laravel/dusk/bin/chromedriver-mac --port={$port} > /dev/null 2>&1 &");
+        } else {
+            exec("vendor/laravel/dusk/bin/chromedriver-linux --port={$port} > /dev/null 2>&1 &");
+        }
+    }
+    
+    /**
+     * Verify that ChromeDriver is running on the specified port.
+     */
+    protected static function verifyDriverIsRunning(int $port): bool
+    {
+        echo "Verifying ChromeDriver is running on port {$port}...\n";
+        
+        // Try to connect to ChromeDriver status endpoint
+        $ch = curl_init("http://localhost:{$port}/status");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        // Check if we got a valid response
+        if ($response && $httpCode === 200) {
+            echo "ChromeDriver is running successfully on port {$port}.\n";
+            return true;
+        }
+        
+        // Check if the process is running using OS-specific commands
+        if (PHP_OS_FAMILY === 'Linux') {
+            exec("pgrep -f 'chromedriver.*--port={$port}'", $output);
+            return !empty($output);
+        }
+        
+        return false;
     }
     
     /**
@@ -91,6 +194,9 @@ abstract class DuskTestCase extends BaseTestCase
     #[AfterClass]
     public static function cleanup(): void
     {
+        // Kill any remaining Chrome and ChromeDriver processes
+        static::killExistingProcesses();
+        
         // Clean up Chrome user data directories
         $chromeDataDirs = glob(sys_get_temp_dir() . '/chrome_test_dirs/dusk_*');
         if (is_array($chromeDataDirs)) {
@@ -100,6 +206,8 @@ abstract class DuskTestCase extends BaseTestCase
                 }
             }
         }
+        
+        echo "Cleanup completed successfully.\n";
     }
     
     /**
@@ -143,6 +251,21 @@ abstract class DuskTestCase extends BaseTestCase
         
         // Log the user data directory for debugging
         echo "Using Chrome user data directory: $userDataDir\n";
+        
+        // Verify ChromeDriver is still running before attempting to connect
+        $driverUrl = $_ENV['DUSK_DRIVER_URL'] ?? env('DUSK_DRIVER_URL') ?? 'http://localhost:9515';
+        $port = parse_url($driverUrl, PHP_URL_PORT) ?: 9515;
+        
+        if (!static::verifyDriverIsRunning($port)) {
+            echo "ChromeDriver not running before test. Attempting to restart...\n";
+            static::killExistingProcesses();
+            static::startChromeDriverManually($port);
+            sleep(3);
+            
+            if (!static::verifyDriverIsRunning($port)) {
+                throw new \Exception("Failed to start ChromeDriver on port {$port}. Tests cannot continue.");
+            }
+        }
 
         $options = (new ChromeOptions);
         
@@ -225,11 +348,39 @@ abstract class DuskTestCase extends BaseTestCase
         
         $options->addArguments($chromeArguments->all());
 
-        return RemoteWebDriver::create(
-            $_ENV['DUSK_DRIVER_URL'] ?? env('DUSK_DRIVER_URL') ?? 'http://localhost:9515',
-            DesiredCapabilities::chrome()->setCapability(
-                ChromeOptions::CAPABILITY, $options
-            )
-        );
+        // Get the driver URL from environment or use default
+        $driverUrl = $_ENV['DUSK_DRIVER_URL'] ?? env('DUSK_DRIVER_URL') ?? 'http://localhost:9515';
+        echo "Connecting to ChromeDriver at: {$driverUrl}\n";
+        
+        try {
+            return RemoteWebDriver::create(
+                $driverUrl,
+                DesiredCapabilities::chrome()->setCapability(
+                    ChromeOptions::CAPABILITY, $options
+                ),
+                60000, // Connection timeout in milliseconds (60 seconds)
+                60000  // Request timeout in milliseconds (60 seconds)
+            );
+        } catch (\Exception $e) {
+            echo "Error connecting to ChromeDriver: " . $e->getMessage() . "\n";
+            
+            // Try to restart ChromeDriver one more time
+            $port = parse_url($driverUrl, PHP_URL_PORT) ?: 9515;
+            echo "Attempting to restart ChromeDriver on port {$port}...\n";
+            
+            static::killExistingProcesses();
+            static::startChromeDriverManually($port);
+            sleep(5); // Give it more time to start
+            
+            // Try again with a fresh connection
+            return RemoteWebDriver::create(
+                $driverUrl,
+                DesiredCapabilities::chrome()->setCapability(
+                    ChromeOptions::CAPABILITY, $options
+                ),
+                60000, // Connection timeout in milliseconds (60 seconds)
+                60000  // Request timeout in milliseconds (60 seconds)
+            );
+        }
     }
 }
