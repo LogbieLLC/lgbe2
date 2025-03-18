@@ -31,6 +31,10 @@ trait BrowserTestHelpers
         $firefoxOptions = $options->toArray();
         if ($firefoxBinary) {
             $firefoxOptions['binary'] = $firefoxBinary;
+            // Log the Firefox binary path for debugging
+            error_log("Using Firefox binary: {$firefoxBinary}");
+        } else {
+            error_log("Firefox binary not found!");
         }
         
         // Set preferences for better test stability
@@ -60,10 +64,29 @@ trait BrowserTestHelpers
      */
     protected function findFirefoxBinary()
     {
+        // Prioritize Firefox ESR which is more stable for testing
+        if (file_exists('/usr/bin/firefox-esr')) {
+            error_log("Using Firefox ESR at: /usr/bin/firefox-esr");
+            return '/usr/bin/firefox-esr';
+        }
+        
+        // Use the wrapper script we created in run-dusk-tests.sh
+        $wrapperScript = '/tmp/firefox-wrapper.sh';
+        if (file_exists($wrapperScript) && is_executable($wrapperScript)) {
+            error_log("Using Firefox wrapper script at: " . $wrapperScript);
+            return $wrapperScript;
+        }
+        
+        // Check for other possible Firefox installations
         $possiblePaths = [
             '/usr/bin/firefox-esr',
+            '/usr/local/bin/firefox-esr',
+            '/opt/firefox/firefox',
             '/usr/bin/firefox',
+            '/usr/local/bin/firefox',
             '/snap/bin/firefox',
+            '/snap/firefox/current/usr/lib/firefox/firefox',
+            '/usr/lib/firefox/firefox',
             '/Applications/Firefox.app/Contents/MacOS/firefox',
             'C:\\Program Files\\Mozilla Firefox\\firefox.exe',
             'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe'
@@ -71,6 +94,7 @@ trait BrowserTestHelpers
 
         foreach ($possiblePaths as $path) {
             if (file_exists($path)) {
+                error_log("Found Firefox at: " . $path);
                 return $path;
             }
         }
@@ -79,15 +103,18 @@ trait BrowserTestHelpers
         if (PHP_OS_FAMILY !== 'Windows') {
             exec('which firefox-esr 2>/dev/null', $output);
             if (!empty($output)) {
+                error_log("Found Firefox-esr at: " . $output[0]);
                 return $output[0];
             }
             
             exec('which firefox 2>/dev/null', $output);
             if (!empty($output)) {
+                error_log("Found Firefox at: " . $output[0]);
                 return $output[0];
             }
         }
         
+        error_log("No Firefox binary found!");
         return null;
     }
 }
