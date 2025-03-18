@@ -9,7 +9,11 @@ const loading = ref(true);
 onMounted(async () => {
     try {
         const response = await axios.get('/api/communities');
-        communities.value = response.data.data;
+        if (response.data && response.data.data) {
+            communities.value = response.data.data;
+        } else {
+            console.error('Unexpected API response format:', response.data);
+        }
     } catch (error) {
         console.error('Error fetching communities:', error);
     } finally {

@@ -13,14 +13,34 @@ class CommunityController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $communities = Community::withCount('members')
             ->orderBy('members_count', 'desc')
             ->paginate(20);
             
+        if ($request->expectsJson()) {
+            return response()->json([
+                'data' => $communities->items(),
+                'links' => [
+                    'prev_page_url' => $communities->previousPageUrl(),
+                    'next_page_url' => $communities->nextPageUrl()
+                ],
+                'meta' => [
+                    'current_page' => $communities->currentPage(),
+                    'last_page' => $communities->lastPage(),
+                    'per_page' => $communities->perPage(),
+                    'total' => $communities->total()
+                ]
+            ]);
+        }
+            
         return Inertia::render('Communities/Index', [
-            'communities' => $communities
+            'communities' => [
+                'data' => $communities->items(),
+                'prev_page_url' => $communities->previousPageUrl(),
+                'next_page_url' => $communities->nextPageUrl()
+            ]
         ]);
     }
 
