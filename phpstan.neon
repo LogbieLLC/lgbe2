@@ -7,4 +7,3 @@ parameters:
         - vendor
         - storage
         - bootstrap/cache
-    checkMissingIterableValueType: false
