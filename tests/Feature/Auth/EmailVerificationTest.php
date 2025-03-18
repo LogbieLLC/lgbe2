@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
+use PHPUnit\Framework\Attributes\Test;
 class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
