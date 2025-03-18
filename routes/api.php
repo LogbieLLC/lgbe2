@@ -1,16 +1,9 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Auth\NewPasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\BanController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\CommunityController;
-use App\Http\Controllers\PostController;
+use App\Http\Controllers\MetricsController;
+use App\Http\Controllers\PerformanceDashboardController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\VoteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,42 +22,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// API Authentication Routes
-Route::post('/auth/register', [RegisteredUserController::class, 'apiStore']);
-Route::post('/auth/login', [AuthenticatedSessionController::class, 'apiStore']);
-Route::post('/auth/forgot-password', [PasswordResetLinkController::class, 'apiStore']);
-Route::post('/auth/reset-password', [NewPasswordController::class, 'apiStore']);
+// Search routes
+Route::get('/search', [SearchController::class, 'search']);
 
-// Communities
-Route::apiResource('communities', CommunityController::class);
-Route::post('communities/{community}/join', [CommunityController::class, 'join'])->middleware(['auth:sanctum', \App\Http\Middleware\CheckBanned::class]);
-Route::post('communities/{community}/leave', [CommunityController::class, 'leave'])->middleware(['auth:sanctum', \App\Http\Middleware\CheckBanned::class]);
+// User routes
+Route::get('/users/{user}', [UserController::class, 'show']);
 
-// Posts
-Route::apiResource('communities.posts', PostController::class)
-    ->middleware(['auth:sanctum', \App\Http\Middleware\CheckBanned::class], ['only' => ['store']])
-    ->shallow();
-Route::delete('communities/{community}/posts/{post}', [PostController::class, 'removeFromCommunity'])->middleware('auth:sanctum');
+// Performance metrics collection endpoint - public but rate limited
+Route::post('/metrics', [MetricsController::class, 'store'])
+    ->middleware('throttle:60,1'); // Limit to 60 requests per minute
 
-// Comments
-Route::apiResource('posts.comments', CommentController::class)->shallow();
-Route::apiResource('comments.replies', CommentController::class)->shallow();
-
-// Votes
-Route::post('posts/{post}/vote', [VoteController::class, 'votePost'])->middleware('auth:sanctum');
-Route::post('comments/{comment}/vote', [VoteController::class, 'voteComment'])->middleware('auth:sanctum');
-
-// Bans
-Route::post('communities/{community}/ban/{user}', [BanController::class, 'store'])->middleware('auth:sanctum');
-Route::delete('communities/{community}/ban/{user}', [BanController::class, 'destroy'])->middleware('auth:sanctum');
-
-// Search
-Route::get('search/communities', [SearchController::class, 'searchCommunities']);
-Route::get('search/posts', [SearchController::class, 'searchPosts']);
-Route::get('search/comments', [SearchController::class, 'searchComments']);
-
-// User Profiles
-Route::get('users/{user}', [UserController::class, 'show']);
-Route::put('users/{user}', [UserController::class, 'update'])->middleware('auth:sanctum');
-Route::get('users/{user}/posts', [UserController::class, 'posts']);
-Route::get('users/{user}/comments', [UserController::class, 'comments']);
+// Performance dashboard API routes - protected
+Route::middleware(['auth:sanctum', 'performance.dashboard'])->prefix('performance')->group(function () {
+    Route::get('/trends', [PerformanceDashboardController::class, 'getTrends']);
+    Route::get('/reports/download', [PerformanceDashboardController::class, 'downloadReport']);
+});

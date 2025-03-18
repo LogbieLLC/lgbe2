@@ -1,41 +1,52 @@
 <?php
 
 use App\Http\Controllers\CommunityController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PerformanceDashboardController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Home page
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
 
-// Dashboard
-Route::get('dashboard', function () {
-    $user = auth()->user();
-    return Inertia::render('Dashboard', [
-        'createdCommunities' => $user->createdCommunities()->with('members:id')->withCount('members')->get(),
-        'moderatedCommunities' => $user->moderatedCommunities()->with('members:id')->withCount('members')->get(),
+Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
     ]);
+});
+
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// Communities
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Community routes
 Route::get('/communities', [CommunityController::class, 'index'])->name('communities.index');
-Route::get('/communities/create', [CommunityController::class, 'create'])->middleware('auth')->name('communities.create');
-Route::get('/communities/{community}', [CommunityController::class, 'show'])->middleware(\App\Http\Middleware\CheckBanned::class)->name('communities.show');
-Route::get('/communities/{community}/edit', [CommunityController::class, 'edit'])->middleware(['auth', \App\Http\Middleware\CheckBanned::class])->name('communities.edit');
+Route::get('/communities/create', [CommunityController::class, 'create'])->middleware(['auth'])->name('communities.create');
+Route::post('/communities', [CommunityController::class, 'store'])->middleware(['auth'])->name('communities.store');
+Route::get('/communities/{community:slug}', [CommunityController::class, 'show'])->name('communities.show');
 
-// Posts
-Route::get('/communities/{community}/posts/create', [PostController::class, 'create'])->middleware(['auth', \App\Http\Middleware\CheckBanned::class])->name('posts.create');
-Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
-Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->middleware('auth')->name('posts.edit');
+// Performance dashboard routes
+Route::middleware(['auth', 'performance.dashboard'])->prefix('performance')->group(function () {
+    Route::get('/', [PerformanceDashboardController::class, 'index'])->name('performance.dashboard');
+    Route::get('/page/{urlPath}', [PerformanceDashboardController::class, 'pageDetails'])->name('performance.page');
+});
 
-// User profiles
-Route::get('/u/{user}', [ProfileController::class, 'show'])->name('profile.show');
-
-// Include other route files
-require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
-require __DIR__.'/api.php';

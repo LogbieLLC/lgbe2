@@ -1,12 +1,19 @@
-import { Config, RouteParams } from 'ziggy-js';
-
-declare global {
-    function route(): Config;
-    function route(name: string, params?: RouteParams<typeof name> | undefined, absolute?: boolean): string;
+declare module '@inertiajs/vue3' {
+  export function usePage<T = Record<string, any>>(): {
+    props: T;
+    url: string;
+    component: string;
+    version: string | null;
+  };
 }
 
-declare module '@vue/runtime-core' {
-    interface ComponentCustomProperties {
-        route: typeof route;
-    }
+declare module '../../vendor/tightenco/ziggy/dist/vue.m' {
+  import { Plugin } from 'vue';
+  export const ZiggyVue: Plugin;
+}
+
+declare global {
+  interface Window {
+    Ziggy: any;
+  }
 }
