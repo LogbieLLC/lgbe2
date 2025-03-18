@@ -29,8 +29,12 @@ trait BrowserTestHelpers
         
         // Get Firefox options as array and set binary path directly
         $firefoxOptions = $options->toArray();
+        
+        // Set binary path if found
         if ($firefoxBinary) {
+            // Set binary path in options array for Firefox
             $firefoxOptions['binary'] = $firefoxBinary;
+            
             // Log the Firefox binary path for debugging
             error_log("Using Firefox binary: {$firefoxBinary}");
         } else {
@@ -64,6 +68,13 @@ trait BrowserTestHelpers
      */
     protected function findFirefoxBinary()
     {
+        // Check for environment variable first (used in CI)
+        $envBinary = getenv('FIREFOX_BINARY_PATH');
+        if ($envBinary && file_exists($envBinary)) {
+            error_log("Using Firefox from environment variable: {$envBinary}");
+            return $envBinary;
+        }
+        
         // Prioritize Firefox ESR which is more stable for testing
         if (file_exists('/usr/bin/firefox-esr')) {
             error_log("Using Firefox ESR at: /usr/bin/firefox-esr");
