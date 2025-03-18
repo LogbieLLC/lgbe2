@@ -61,6 +61,17 @@ if ! command -v firefox &> /dev/null; then
     sudo apt-get update && sudo apt-get install -y firefox
 fi
 
+# Create a wrapper script for Firefox if needed
+FIREFOX_WRAPPER="/tmp/firefox-wrapper.sh"
+echo -e "${YELLOW}Creating Firefox wrapper script at ${FIREFOX_WRAPPER}...${NC}"
+cat > ${FIREFOX_WRAPPER} << 'EOF'
+#!/bin/bash
+# Firefox wrapper script for Dusk tests
+exec /usr/bin/firefox "$@"
+EOF
+chmod +x ${FIREFOX_WRAPPER}
+echo -e "${GREEN}Firefox wrapper script created successfully.${NC}"
+
 # Verify GeckoDriver is installed
 echo -e "${YELLOW}Verifying GeckoDriver installation...${NC}"
 if ! command -v geckodriver &> /dev/null; then
