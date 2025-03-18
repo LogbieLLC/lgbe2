@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Script to run Laravel Dusk tests and generate a report
+# Script to run Laravel Dusk tests with Firefox and GeckoDriver
+# Updated to use Firefox instead of Chrome
 
 # Set colors for output
 GREEN='\033[0;32m'
@@ -8,107 +9,147 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
-echo -e "${YELLOW}Starting Laravel Dusk End-to-End Tests${NC}"
+echo -e "${YELLOW}Starting Laravel Dusk End-to-End Tests with Firefox${NC}"
 echo "========================================"
 
-# Ensure Chrome driver is running
-echo -e "${YELLOW}Starting Chrome driver...${NC}"
-php artisan dusk:chrome-driver --detect
-php artisan dusk:chrome-driver
+# Ensure GeckoDriver is running
+echo -e "${YELLOW}Setting up Firefox and GeckoDriver...${NC}"
+
+# Kill any existing Firefox processes
+echo -e "${YELLOW}Cleaning up existing Firefox processes...${NC}"
+if [ "$(uname)" == "Darwin" ]; then
+    # macOS
+    pkill -f firefox || true
+    pkill -f geckodriver || true
+elif [ "$(uname)" == "Linux" ]; then
+    # Linux
+    pkill -f firefox || true
+    pkill -f geckodriver || true
+else
+    # Windows (Git Bash)
+    taskkill //F //IM firefox.exe > /dev/null 2>&1 || true
+    taskkill //F //IM geckodriver.exe > /dev/null 2>&1 || true
+fi
+
+# Wait for processes to fully terminate
+sleep 2
+
+# Define GeckoDriver port
+GECKODRIVER_PORT=4444
+echo -e "${YELLOW}Using GeckoDriver port: ${GECKODRIVER_PORT}${NC}"
+
+# Install netstat if not available
+if ! command -v netstat &> /dev/null; then
+    echo -e "${YELLOW}Installing net-tools for netstat...${NC}"
+    sudo apt-get update -qq && sudo apt-get install -y net-tools
+fi
+
+# Check if port is already in use
+if command -v netstat &> /dev/null; then
+    PORT_IN_USE=$(netstat -tuln | grep ":${GECKODRIVER_PORT} " | wc -l)
+    if [ "$PORT_IN_USE" -gt 0 ]; then
+        echo -e "${RED}Port ${GECKODRIVER_PORT} is already in use. Trying to free it...${NC}"
+        sudo fuser -k ${GECKODRIVER_PORT}/tcp || true
+        sleep 2
+    fi
+fi
+
+# Verify Firefox is installed
+echo -e "${YELLOW}Verifying Firefox installation...${NC}"
+if ! command -v firefox &> /dev/null; then
+    echo -e "${RED}Firefox not found. Installing Firefox...${NC}"
+    sudo apt-get update && sudo apt-get install -y firefox
+fi
+
+# Verify GeckoDriver is installed
+echo -e "${YELLOW}Verifying GeckoDriver installation...${NC}"
+if ! command -v geckodriver &> /dev/null; then
+    echo -e "${RED}GeckoDriver not found. Installing GeckoDriver...${NC}"
+    GECKODRIVER_VERSION="v0.33.0"
+    wget https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
+    tar -xvzf geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz
+    sudo mv geckodriver /usr/local/bin/
+    sudo chmod +x /usr/local/bin/geckodriver
+fi
+
+# Start GeckoDriver in the background with explicit port
+echo -e "${YELLOW}Starting GeckoDriver...${NC}"
+geckodriver --port ${GECKODRIVER_PORT} > /tmp/geckodriver.log 2>&1 &
+GECKODRIVER_PID=$!
+echo -e "${YELLOW}Started GeckoDriver with PID: ${GECKODRIVER_PID}${NC}"
+
+# Wait for GeckoDriver to start
+sleep 3
+
+# Verify GeckoDriver is running
+echo -e "${YELLOW}Verifying GeckoDriver is running...${NC}"
+if curl -s http://localhost:${GECKODRIVER_PORT}/status > /dev/null; then
+    echo -e "${GREEN}GeckoDriver is running successfully on port ${GECKODRIVER_PORT}${NC}"
+else
+    echo -e "${RED}GeckoDriver is not running. Attempting to restart...${NC}"
+    cat /tmp/geckodriver.log
+    
+    # Try restarting GeckoDriver
+    pkill -f geckodriver || true
+    sleep 2
+    geckodriver --port ${GECKODRIVER_PORT} > /tmp/geckodriver.log 2>&1 &
+    GECKODRIVER_PID=$!
+    echo -e "${YELLOW}Restarted GeckoDriver with PID: ${GECKODRIVER_PID}${NC}"
+    sleep 3
+    
+    # Check again
+    if ! curl -s http://localhost:${GECKODRIVER_PORT}/status > /dev/null; then
+        echo -e "${RED}GeckoDriver failed to start. See log:${NC}"
+        cat /tmp/geckodriver.log
+        exit 1
+    fi
+fi
+
+# Export the GeckoDriver URL for Dusk to use
+export DUSK_DRIVER_URL="http://localhost:${GECKODRIVER_PORT}"
 
 # Clear previous screenshots
 echo -e "${YELLOW}Clearing previous screenshots...${NC}"
 rm -rf tests/Browser/screenshots/*
 
-# Run the tests
+# Create custom phpunit.dusk.xml configuration for Firefox
+echo -e "${YELLOW}Creating custom phpunit.dusk.xml configuration...${NC}"
+cat > phpunit.dusk.xml << EOFXML
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+        bootstrap="tests/bootstrap.php"
+        colors="true">
+    <testsuites>
+        <testsuite name="Browser">
+            <directory>tests/Browser</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="DUSK_DRIVER_URL" value="http://localhost:${GECKODRIVER_PORT}"/>
+    </php>
+</phpunit>
+EOFXML
+
+# Run the tests with custom configuration
 echo -e "${YELLOW}Running tests...${NC}"
-php artisan dusk
+php artisan dusk --configuration=phpunit.dusk.xml
+
+# Cleanup GeckoDriver after tests
+echo -e "${YELLOW}Cleaning up GeckoDriver process...${NC}"
+if [ "$(uname)" == "Darwin" ] || [ "$(uname)" == "Linux" ]; then
+    kill $GECKODRIVER_PID 2>/dev/null || true
+    pkill -f geckodriver || true
+    pkill -f firefox || true
+else
+    taskkill //F //IM geckodriver.exe > /dev/null 2>&1 || true
+    taskkill //F //IM firefox.exe > /dev/null 2>&1 || true
+fi
 
 # Check if tests passed
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}All tests passed!${NC}"
 else
     echo -e "${RED}Some tests failed. Check the output above for details.${NC}"
-    echo -e "${YELLOW}Screenshots of failed tests are available in tests/Browser/screenshots/${NC}"
 fi
-
-# Generate a simple HTML report
-echo -e "${YELLOW}Generating test report...${NC}"
-
-# Create report directory if it doesn't exist
-mkdir -p tests/Browser/reports
-
-# Get current date and time
-DATE=$(date +"%Y-%m-%d %H:%M:%S")
-
-# Create HTML report
-cat > tests/Browser/reports/report.html << EOF
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dusk Test Report</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        h1, h2 {
-            color: #2c3e50;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .screenshot {
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .screenshot img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin-top: 10px;
-        }
-        .timestamp {
-            color: #7f8c8d;
-            font-size: 0.9em;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Laravel Dusk Test Report</h1>
-        <p class="timestamp">Generated on: $DATE</p>
-        
-        <h2>Test Screenshots</h2>
-        <div class="screenshots">
-EOF
-
-# Add screenshots to the report
-for screenshot in tests/Browser/screenshots/*.png; do
-    if [ -f "$screenshot" ]; then
-        filename=$(basename "$screenshot")
-        echo "            <div class=\"screenshot\">" >> tests/Browser/reports/report.html
-        echo "                <h3>$filename</h3>" >> tests/Browser/reports/report.html
-        echo "                <img src=\"../screenshots/$filename\" alt=\"$filename\">" >> tests/Browser/reports/report.html
-        echo "            </div>" >> tests/Browser/reports/report.html
-    fi
-done
-
-# Close the HTML file
-cat >> tests/Browser/reports/report.html << EOF
-        </div>
-    </div>
-</body>
-</html>
-EOF
-
-echo -e "${GREEN}Test report generated at tests/Browser/reports/report.html${NC}"
-echo "========================================"
