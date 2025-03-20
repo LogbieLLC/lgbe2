@@ -39,3 +39,6 @@ Welcome to the LGBE2 documentation. This documentation provides comprehensive in
 - [Deployment](deployment/README.md)
   - [Production Setup](deployment/production-setup.md)
   - [Performance Optimization](deployment/performance-optimization.md)
+
+- [Testing](testing/README.md)
+  - [Testing Policy](testing/testing-policy.md)
