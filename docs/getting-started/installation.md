@@ -99,3 +99,8 @@ For production:
 ```bash
 npm run build
 ```
+
+You can also use the Python script to start the Vite server:
+```bash
+python startup.py
+```

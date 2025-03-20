@@ -122,6 +122,11 @@ npm run dev
 
 This will start the Vite development server with hot module replacement for Vue.js components.
 
+Alternatively, you can use the new Python script:
+```bash
+python startup.py
+```
+
 ## Development Workflow
 
 ### Backend Development (Laravel)
@@ -194,6 +199,11 @@ run-dusk-tests.bat
 On macOS/Linux:
 ```bash
 ./run-dusk-tests.sh
+```
+
+Alternatively, you can use the new cross-platform Python script:
+```bash
+python run-dusk-tests.py
 ```
 
 Or manually:
