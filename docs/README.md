@@ -20,6 +20,8 @@ Welcome to the LGBE2 documentation. This documentation provides comprehensive in
   - [Moderation](features/moderation.md)
   - [Search](features/search.md)
   - [User Profiles](features/profiles.md)
+  - [Performance](features/performance/README.md)
+    - [Performance Metrics](features/performance/metrics.md)
 
 - [API Documentation](api/README.md)
   - [Authentication](api/authentication.md)
