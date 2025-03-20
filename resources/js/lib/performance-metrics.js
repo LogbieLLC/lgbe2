@@ -5,7 +5,7 @@
  * and sends them to the server for analysis.
  */
 
-import { onLCP, onFID, onCLS, onINP, onFCP } from 'web-vitals';
+import { onLCP, onCLS, onINP, onFCP } from 'web-vitals';
 
 const PerformanceMetrics = {
     /**
