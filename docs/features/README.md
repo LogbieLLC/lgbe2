@@ -9,3 +9,4 @@ This section provides detailed information about the features of the LGBE2 appli
 - [Moderation](moderation.md)
 - [Search](search.md)
 - [User Profiles](profiles.md)
+- [Performance](performance/README.md)
