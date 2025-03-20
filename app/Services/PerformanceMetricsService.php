@@ -14,7 +14,7 @@ class PerformanceMetricsService
     /**
      * Get a summary of core web vitals for a specific time period
      */
-    public function getCoreVitalSummary(string $metricName, int $days = 7, string $urlPath = null)
+    public function getCoreVitalSummary(string $metricName, int $days = 7, ?string $urlPath = null)
     {
         $metricName = strtolower($metricName);
         $startDate = now()->subDays($days)->startOfDay();
@@ -81,7 +81,7 @@ class PerformanceMetricsService
     /**
      * Calculate metric summary on the fly from raw data
      */
-    private function calculateMetricSummary(string $metricName, int $days = 7, string $urlPath = null)
+    private function calculateMetricSummary(string $metricName, int $days = 7, ?string $urlPath = null)
     {
         $startDate = now()->subDays($days)->startOfDay();
         
@@ -137,7 +137,7 @@ class PerformanceMetricsService
     /**
      * Get metric trend data for a specific time period
      */
-    public function getMetricTrend(string $metricName, int $days = 30, string $urlPath = null, string $dimension = null)
+    public function getMetricTrend(string $metricName, int $days = 30, ?string $urlPath = null, ?string $dimension = null)
     {
         $metricName = strtolower($metricName);
         $startDate = now()->subDays($days)->startOfDay();
@@ -199,7 +199,7 @@ class PerformanceMetricsService
     /**
      * Get device type breakdown for a specific metric
      */
-    public function getDeviceTypeBreakdown(string $metricName, int $days = 7, string $urlPath = null)
+    public function getDeviceTypeBreakdown(string $metricName, int $days = 7, ?string $urlPath = null)
     {
         $metricName = strtolower($metricName);
         $startDate = now()->subDays($days)->startOfDay();
@@ -253,12 +253,10 @@ class PerformanceMetricsService
         $startDate = now()->subDays($days)->startOfDay();
         
         // Get the most viewed pages first
-        $topPages = PerformanceMetric::select('url_path')
-            ->where('created_at', '>=', $startDate)
+        $topPages = PerformanceMetric::where('created_at', '>=', $startDate)
             ->groupBy('url_path')
             ->orderByRaw('COUNT(*) DESC')
             ->limit($pageCount)
-            ->get()
             ->pluck('url_path');
             
         $results = [];
