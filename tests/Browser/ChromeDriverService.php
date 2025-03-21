@@ -105,7 +105,7 @@ class ChromeDriverService
         echo "Checking if ChromeDriver is running on port {$this->port}...\n";
 
         // Try to connect to ChromeDriver status endpoint
-        $ch = curl_init("http://localhost:{$this->port}/status");
+        $ch = curl_init("http://127.0.0.1:{$this->port}/status");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
@@ -130,6 +130,6 @@ class ChromeDriverService
      */
     public function getDriverUrl(): string
     {
-        return "http://localhost:{$this->port}";
+        return "http://127.0.0.1:{$this->port}";
     }
 }
