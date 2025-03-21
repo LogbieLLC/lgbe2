@@ -41,7 +41,7 @@ class RegistrationTest extends DuskTestCase
     public function testSuccessfulRegistration(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('registration-home');
         });
@@ -54,7 +54,7 @@ class RegistrationTest extends DuskTestCase
     public function testValidationMissingFields(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('registration-validation');
         });
@@ -67,7 +67,7 @@ class RegistrationTest extends DuskTestCase
     public function testValidationPasswordRequirements(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('registration-password');
         });
@@ -80,7 +80,7 @@ class RegistrationTest extends DuskTestCase
     public function testValidationUniqueEmail(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('registration-email');
         });
