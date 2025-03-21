@@ -76,8 +76,9 @@ abstract class DuskTestCase extends BaseTestCase
         // Set the driver URL environment variable
         putenv("DUSK_DRIVER_URL=http://127.0.0.1:{$port}");
 
-        // Start GeckoDriver
-        $command = "geckodriver --port {$port}";
+        // Start GeckoDriver with explicit log path
+        $logPath = sys_get_temp_dir() . '/geckodriver-' . uniqid() . '.log';
+        $command = "geckodriver --port {$port} --log debug --log-file {$logPath}";
 
         if (PHP_OS_FAMILY === 'Windows') {
             pclose(popen("start /B {$command} > NUL 2>&1", 'r'));
@@ -87,6 +88,16 @@ abstract class DuskTestCase extends BaseTestCase
 
         // Wait for GeckoDriver to start
         sleep(3);
+        
+        // Verify GeckoDriver is running
+        if (PHP_OS_FAMILY !== 'Windows') {
+            exec("netstat -tuln | grep {$port}", $output);
+            if (empty($output)) {
+                echo "Warning: GeckoDriver not detected on port {$port}. Attempting to restart...\n";
+                exec("{$command} > /dev/null 2>&1 &");
+                sleep(5);
+            }
+        }
     }
 
     /**

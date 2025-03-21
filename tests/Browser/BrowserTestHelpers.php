@@ -25,6 +25,13 @@ trait BrowserTestHelpers
         if ($headless) {
             $options->addArguments(['--headless']);
         }
+        
+        // Create a unique user data directory for this test run
+        $userDataDir = sys_get_temp_dir() . '/firefox-profile-' . uniqid();
+        if (!file_exists($userDataDir)) {
+            mkdir($userDataDir, 0755, true);
+        }
+        $options->addArguments(["--profile", $userDataDir]);
 
         // Find Firefox binary
         $firefoxBinary = $this->findFirefoxBinary();
