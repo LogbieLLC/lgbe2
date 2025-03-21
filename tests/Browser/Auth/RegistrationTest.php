@@ -38,7 +38,7 @@ class RegistrationTest extends DuskTestCase
      * Test successful user registration.
      */
     #[Test]
-    public function test_successful_registration(): void
+    public function testSuccessfulRegistration(): void
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
@@ -51,7 +51,7 @@ class RegistrationTest extends DuskTestCase
      * Test validation for missing fields.
      */
     #[Test]
-    public function test_validation_missing_fields(): void
+    public function testValidationMissingFields(): void
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
@@ -64,7 +64,7 @@ class RegistrationTest extends DuskTestCase
      * Test validation for password requirements.
      */
     #[Test]
-    public function test_validation_password_requirements(): void
+    public function testValidationPasswordRequirements(): void
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
@@ -77,7 +77,7 @@ class RegistrationTest extends DuskTestCase
      * Test validation for unique email.
      */
     #[Test]
-    public function test_validation_unique_email(): void
+    public function testValidationUniqueEmail(): void
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
