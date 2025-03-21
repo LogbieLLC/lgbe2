@@ -16,7 +16,7 @@ class HomePageTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('home-page');
         });

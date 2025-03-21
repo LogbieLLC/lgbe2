@@ -27,7 +27,7 @@ class PostCreationTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('post-creation');
         });
@@ -41,7 +41,7 @@ class PostCreationTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('unauthenticated-redirect');
         });
@@ -55,7 +55,7 @@ class PostCreationTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('post-validation');
         });
@@ -69,7 +69,7 @@ class PostCreationTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('post-in-community');
         });
