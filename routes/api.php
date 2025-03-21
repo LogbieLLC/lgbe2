@@ -27,6 +27,9 @@ Route::get('/search', [SearchController::class, 'search']);
 
 // User routes
 Route::get('/users/{user}', [UserController::class, 'show']);
+Route::put('/users/{user}', [UserController::class, 'update'])->middleware('auth:sanctum');
+Route::get('/users/{user}/posts', [UserController::class, 'posts']);
+Route::get('/users/{user}/comments', [UserController::class, 'comments']);
 
 // Performance metrics collection endpoint - public but rate limited
 Route::post('/metrics', [MetricsController::class, 'store'])
