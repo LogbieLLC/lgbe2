@@ -199,7 +199,7 @@ jobs:
           sleep 3
           
           # Verify Geckodriver is running
-          if curl -s http://localhost:${GECKODRIVER_PORT}/status > /dev/null; then
+          if curl -s http://127.0.0.1:${GECKODRIVER_PORT}/status > /dev/null; then
             echo "Geckodriver is running successfully on port ${GECKODRIVER_PORT}"
           else
             echo "Geckodriver failed to start. See log:"
@@ -234,7 +234,7 @@ jobs:
       - name: Run Dusk Tests with Firefox
         env:
           APP_URL: "http://127.0.0.1:8000"
-          DUSK_DRIVER_URL: "http://localhost:4444"
+          DUSK_DRIVER_URL: "http://127.0.0.1:4444"
         run: |
           # Create Firefox wrapper script
           FIREFOX_WRAPPER="/tmp/firefox-wrapper.sh"
@@ -261,7 +261,7 @@ jobs:
               </testsuites>
               <php>
                   <env name="APP_ENV" value="testing"/>
-                  <env name="DUSK_DRIVER_URL" value="http://localhost:4444"/>
+                  <env name="DUSK_DRIVER_URL" value="http://127.0.0.1:4444"/>
                   <env name="FIREFOX_BINARY_PATH" value="/usr/bin/firefox-esr"/>
               </php>
           </phpunit>

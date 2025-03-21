@@ -74,7 +74,7 @@ abstract class DuskTestCase extends BaseTestCase
         $port = 4444;
 
         // Set the driver URL environment variable
-        putenv("DUSK_DRIVER_URL=http://localhost:{$port}");
+        putenv("DUSK_DRIVER_URL=http://127.0.0.1:{$port}");
 
         // Start GeckoDriver
         $command = "geckodriver --port {$port}";
@@ -97,7 +97,7 @@ abstract class DuskTestCase extends BaseTestCase
     protected function driver()
     {
         // Get the driver URL from environment or use default
-        $driverUrl = env('DUSK_DRIVER_URL', 'http://localhost:4444');
+        $driverUrl = env('DUSK_DRIVER_URL', 'http://127.0.0.1:4444');
 
         // Create the WebDriver instance with longer timeouts
         $driver = RemoteWebDriver::create(
