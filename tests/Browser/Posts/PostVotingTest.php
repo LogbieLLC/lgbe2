@@ -27,7 +27,7 @@ class PostVotingTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('upvote-test');
         });
@@ -41,7 +41,7 @@ class PostVotingTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('downvote-test');
         });
@@ -55,7 +55,7 @@ class PostVotingTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('vote-toggle-test');
         });
@@ -69,7 +69,7 @@ class PostVotingTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('unauthenticated-vote-test');
         });
@@ -83,7 +83,7 @@ class PostVotingTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('vote-count-test');
         });
