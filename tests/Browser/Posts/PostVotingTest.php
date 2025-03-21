@@ -23,7 +23,7 @@ class PostVotingTest extends DuskTestCase
      * Test that authenticated users can upvote posts.
      */
     #[Test]
-    public function test_authenticated_user_can_upvote(): void
+    public function testAuthenticatedUserCanUpvote(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -37,7 +37,7 @@ class PostVotingTest extends DuskTestCase
      * Test that authenticated users can downvote posts.
      */
     #[Test]
-    public function test_authenticated_user_can_downvote(): void
+    public function testAuthenticatedUserCanDownvote(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -51,7 +51,7 @@ class PostVotingTest extends DuskTestCase
      * Test that votes toggle when clicking the same button.
      */
     #[Test]
-    public function test_vote_toggles_when_clicking_same_button(): void
+    public function testVoteTogglesWhenClickingSameButton(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -65,7 +65,7 @@ class PostVotingTest extends DuskTestCase
      * Test that unauthenticated users cannot vote.
      */
     #[Test]
-    public function test_unauthenticated_users_cannot_vote(): void
+    public function testUnauthenticatedUsersCannotVote(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -79,7 +79,7 @@ class PostVotingTest extends DuskTestCase
      * Test that vote count updates correctly.
      */
     #[Test]
-    public function test_vote_count_updates_correctly(): void
+    public function testVoteCountUpdatesCorrectly(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
