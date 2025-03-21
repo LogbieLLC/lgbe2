@@ -17,7 +17,7 @@ return new class extends Migration
             $table->morphs('votable');
             $table->enum('vote_type', ['up', 'down']);
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'votable_id', 'votable_type']);
         });
     }

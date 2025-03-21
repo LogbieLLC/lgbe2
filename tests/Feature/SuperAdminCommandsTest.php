@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+
 // TestCase and refreshDatabase are now used from Pest.php
 
 test('make:super-admin command can create a new super admin user', function () {

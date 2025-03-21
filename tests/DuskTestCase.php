@@ -12,7 +12,8 @@ use Tests\Browser\BrowserTestHelpers;
 
 abstract class DuskTestCase extends BaseTestCase
 {
-    use CreatesApplication, BrowserTestHelpers;
+    use CreatesApplication;
+    use BrowserTestHelpers;
 
     /**
      * Indicates whether exception handling is enabled.
@@ -20,7 +21,7 @@ abstract class DuskTestCase extends BaseTestCase
      * @var bool
      */
     protected $enablesExceptionHandling = true;
-    
+
     // Exception and error handlers are now managed by ExceptionHandlerTrait
     // through the BrowserTestHelpers trait
 
@@ -32,12 +33,12 @@ abstract class DuskTestCase extends BaseTestCase
     {
         // Store original exception and error handlers
         // We'll use the trait's methods during instance setup/teardown instead
-        
+
         if (!static::runningInSail()) {
             static::startFirefoxDriver();
         }
     }
-    
+
     /**
      * Clean up after Dusk test execution.
      */
@@ -65,25 +66,25 @@ abstract class DuskTestCase extends BaseTestCase
             exec('taskkill /F /IM geckodriver.exe >nul 2>&1 || true');
             exec('taskkill /F /IM firefox.exe >nul 2>&1 || true');
         }
-        
+
         // Wait for processes to fully terminate
         sleep(2);
-        
+
         // Start GeckoDriver
         $port = 4444;
-        
+
         // Set the driver URL environment variable
         putenv("DUSK_DRIVER_URL=http://localhost:{$port}");
-        
+
         // Start GeckoDriver
         $command = "geckodriver --port {$port}";
-        
+
         if (PHP_OS_FAMILY === 'Windows') {
             pclose(popen("start /B {$command} > NUL 2>&1", 'r'));
         } else {
             exec("{$command} > /dev/null 2>&1 &");
         }
-        
+
         // Wait for GeckoDriver to start
         sleep(3);
     }
@@ -97,7 +98,7 @@ abstract class DuskTestCase extends BaseTestCase
     {
         // Get the driver URL from environment or use default
         $driverUrl = env('DUSK_DRIVER_URL', 'http://localhost:4444');
-        
+
         // Create the WebDriver instance with longer timeouts
         $driver = RemoteWebDriver::create(
             $driverUrl,
@@ -105,10 +106,10 @@ abstract class DuskTestCase extends BaseTestCase
             60000, // Connection timeout in milliseconds
             60000  // Request timeout in milliseconds
         );
-        
+
         return $driver;
     }
-    
+
     /**
      * Setup before each test.
      *
@@ -117,15 +118,15 @@ abstract class DuskTestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Use the ExceptionHandlerTrait to manage exception handlers
         $this->setUpExceptionHandlers();
-        
+
         if ($this->enablesExceptionHandling) {
             $this->withExceptionHandling();
         }
     }
-    
+
     /**
      * Clean up after each test.
      *
@@ -135,10 +136,10 @@ abstract class DuskTestCase extends BaseTestCase
     {
         // Use the ExceptionHandlerTrait to restore exception handlers
         $this->tearDownExceptionHandlers();
-        
+
         parent::tearDown();
     }
-    
+
     /**
      * Enable exception handling.
      *
@@ -147,15 +148,15 @@ abstract class DuskTestCase extends BaseTestCase
     protected function withExceptionHandling()
     {
         $this->enablesExceptionHandling = true;
-        
+
         $this->app->singleton(
             'Illuminate\Contracts\Debug\ExceptionHandler',
             'Illuminate\Foundation\Exceptions\Handler'
         );
-        
+
         return $this;
     }
-    
+
     /**
      * Disable exception handling for a test.
      *
@@ -165,26 +166,28 @@ abstract class DuskTestCase extends BaseTestCase
     protected function withoutExceptionHandling(array $except = [])
     {
         $this->enablesExceptionHandling = false;
-        
-        $this->app->instance('Illuminate\Contracts\Debug\ExceptionHandler', new class($except) extends \Illuminate\Foundation\Exceptions\Handler {
+
+        $this->app->instance('Illuminate\Contracts\Debug\ExceptionHandler', new class ($except) extends \Illuminate\Foundation\Exceptions\Handler {
             protected $except;
-            
+
             public function __construct(array $except = [])
             {
                 $this->except = $except;
             }
-            
-            public function report(\Throwable $e) {}
-            
+
+            public function report(\Throwable $e)
+            {
+            }
+
             public function render($request, \Throwable $e)
             {
                 if ($this->shouldReport($e) && !$this->isExceptional($e)) {
                     throw $e;
                 }
-                
+
                 return parent::render($request, $e);
             }
-            
+
             protected function isExceptional(\Throwable $e)
             {
                 return collect($this->except)->contains(function ($type) use ($e) {

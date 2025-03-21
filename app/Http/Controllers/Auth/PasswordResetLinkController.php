@@ -39,7 +39,7 @@ class PasswordResetLinkController extends Controller
 
         return back()->with('status', __('A reset link will be sent if the account exists.'));
     }
-    
+
     /**
      * Handle an incoming API password reset link request.
      *

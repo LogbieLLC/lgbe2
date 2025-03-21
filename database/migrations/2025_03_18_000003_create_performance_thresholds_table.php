@@ -19,11 +19,11 @@ return new class extends Migration
             $table->float('poor_threshold');                // Value above which is considered poor
             $table->string('device_type', 20)->nullable();  // NULL for all devices or specific device type
             $table->timestamps();
-            
+
             // Ensure unique combinations
             $table->unique(['metric_name', 'url_pattern', 'device_type'], 'unique_threshold');
         });
-        
+
         // Insert default thresholds based on Core Web Vitals
         DB::table('performance_thresholds')->insert([
             [

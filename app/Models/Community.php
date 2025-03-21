@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Community extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,7 +20,7 @@ class Community extends Model
         'rules',
         'created_by',
     ];
-    
+
     /**
      * Get the user who created the community.
      */
@@ -28,7 +28,7 @@ class Community extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-    
+
     /**
      * Get the members of the community.
      */
@@ -39,7 +39,7 @@ class Community extends Model
             ->withPivot('role')
             ->withTimestamps();
     }
-    
+
     /**
      * Get the moderators of the community.
      */
@@ -50,7 +50,7 @@ class Community extends Model
             ->wherePivot('role', 'moderator')
             ->withTimestamps();
     }
-    
+
     /**
      * Get the posts in the community.
      */
@@ -58,7 +58,7 @@ class Community extends Model
     {
         return $this->hasMany(Post::class);
     }
-    
+
     /**
      * Get the bans in the community.
      */

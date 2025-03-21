@@ -19,7 +19,7 @@ class PostFactory extends Factory
     public function definition(): array
     {
         static $increment = 1;
-        
+
         return [
             'title' => 'Post Title ' . $increment++,
             'content' => 'Content for post ' . $increment,

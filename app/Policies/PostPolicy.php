@@ -41,7 +41,7 @@ class PostPolicy
         if ($post->user_id === $user->id) {
             return true;
         }
-        
+
         // Or community moderators
         return $post->community->moderators()->where('user_id', $user->id)->exists();
     }
@@ -55,7 +55,7 @@ class PostPolicy
         if ($post->user_id === $user->id) {
             return true;
         }
-        
+
         // Or community moderators
         return $post->community->moderators()->where('user_id', $user->id)->exists();
     }
@@ -69,7 +69,7 @@ class PostPolicy
         if ($post->user_id === $user->id) {
             return true;
         }
-        
+
         // Or community moderators
         return $post->community->moderators()->where('user_id', $user->id)->exists();
     }

@@ -14,7 +14,7 @@ class PostVotingTest extends DuskTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Preserve exception handlers to prevent risky test warnings
         $this->withExceptionHandling();
     }

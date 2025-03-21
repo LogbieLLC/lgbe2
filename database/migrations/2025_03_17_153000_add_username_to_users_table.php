@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('username')->nullable()->after('name');
         });
-        
+
         // Copy name values to username for existing users
         DB::statement('UPDATE users SET username = name');
     }

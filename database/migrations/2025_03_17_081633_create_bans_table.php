@@ -19,7 +19,7 @@ return new class extends Migration
             $table->text('reason')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'community_id']);
         });
     }

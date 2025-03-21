@@ -9,7 +9,6 @@ use Inertia\Inertia;
 
 class CommunityController extends Controller
 {
-    
     /**
      * Display a listing of the resource.
      */
@@ -18,7 +17,7 @@ class CommunityController extends Controller
         $communities = Community::withCount('members')
             ->orderBy('members_count', 'desc')
             ->paginate(20);
-            
+
         if ($request->expectsJson()) {
             return response()->json([
                 'data' => $communities->items(),
@@ -34,7 +33,7 @@ class CommunityController extends Controller
                 ]
             ]);
         }
-            
+
         return Inertia::render('Communities/Index', [
             'communities' => [
                 'data' => $communities->items(),
@@ -62,21 +61,21 @@ class CommunityController extends Controller
             'description' => 'required|string|max:1000',
             'rules' => 'nullable|string|max:5000',
         ]);
-        
+
         $community = Community::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
             'rules' => $validated['rules'] ?? '',
             'created_by' => Auth::id(),
         ]);
-        
+
         // Add the creator as a moderator
         $community->members()->attach(Auth::id(), ['role' => 'moderator']);
-        
+
         if ($request->expectsJson()) {
             return response()->json($community, 201);
         }
-        
+
         return redirect()->route('communities.show', $community)
             ->with('success', 'Community created successfully!');
     }
@@ -87,22 +86,22 @@ class CommunityController extends Controller
     public function show(Community $community)
     {
         $community->load(['creator', 'moderators']);
-        
+
         $posts = $community->posts()
             ->with(['user', 'community'])
             ->withCount(['comments', 'votes'])
             ->orderByDesc('created_at')
             ->paginate(15);
-            
+
         $isMember = false;
         $isModerator = false;
-        
+
         if (Auth::check()) {
             $membership = $community->members()->where('user_id', Auth::id())->first();
             $isMember = $membership !== null;
             $isModerator = $membership && $membership->pivot->role === 'moderator';
         }
-        
+
         return Inertia::render('Communities/Show', [
             'community' => $community,
             'posts' => $posts,
@@ -119,7 +118,7 @@ class CommunityController extends Controller
         if (Auth::id() !== $community->created_by && !$community->moderators()->where('user_id', Auth::id())->exists()) {
             abort(403, 'Unauthorized action');
         }
-        
+
         return Inertia::render('Communities/Edit', [
             'community' => $community,
         ]);
@@ -136,18 +135,18 @@ class CommunityController extends Controller
             }
             abort(403, 'Unauthorized action');
         }
-        
+
         $validated = $request->validate([
             'description' => 'required|string|max:1000',
             'rules' => 'nullable|string|max:5000',
         ]);
-        
+
         $community->update($validated);
-        
+
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Community updated successfully']);
         }
-        
+
         return redirect()->route('communities.show', $community)
             ->with('success', 'Community updated successfully!');
     }
@@ -163,17 +162,17 @@ class CommunityController extends Controller
             }
             abort(403, 'Unauthorized action');
         }
-        
+
         $community->delete();
-        
+
         if (request()->expectsJson()) {
             return response()->json(['message' => 'Community deleted successfully']);
         }
-        
+
         return redirect()->route('communities.index')
             ->with('success', 'Community deleted successfully!');
     }
-    
+
     /**
      * Join a community.
      */
@@ -184,10 +183,10 @@ class CommunityController extends Controller
             $community->members()->attach(Auth::id(), ['role' => 'member']);
             return response()->json(['message' => 'Successfully joined community']);
         }
-        
+
         return response()->json(['message' => 'Already a member of this community'], 400);
     }
-    
+
     /**
      * Leave a community.
      */
@@ -199,11 +198,11 @@ class CommunityController extends Controller
             if ($community->created_by === Auth::id()) {
                 return response()->json(['message' => 'Community creator cannot leave'], 403);
             }
-            
+
             $community->members()->detach(Auth::id());
             return response()->json(['message' => 'Left community successfully']);
         }
-        
+
         return response()->json(['message' => 'Not a member of this community'], 409);
     }
 }

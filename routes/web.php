@@ -49,4 +49,4 @@ Route::middleware(['auth', 'performance.dashboard'])->prefix('performance')->gro
     Route::get('/page/{urlPath}', [PerformanceDashboardController::class, 'pageDetails'])->name('performance.page');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

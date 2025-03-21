@@ -6,7 +6,7 @@ use App\Models\CommunityUser;
 
 test('user can create a community', function () {
     $user = User::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->postJson('/api/communities', [
             'name' => 'testcommunity',
@@ -38,7 +38,7 @@ test('user can create a community', function () {
 
 test('user cannot create community with invalid data', function () {
     $user = User::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->postJson('/api/communities', [
             'name' => 't', // Too short
@@ -52,7 +52,7 @@ test('user cannot create community with invalid data', function () {
 test('user can join a community', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/communities/{$community->id}/join");
 
@@ -69,7 +69,7 @@ test('user can join a community', function () {
 test('user cannot join same community twice', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     // First join
     $this->actingAs($user)
         ->postJson("/api/communities/{$community->id}/join");
@@ -85,7 +85,7 @@ test('user cannot join same community twice', function () {
 test('moderator can update community rules', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     // Make user a moderator
     $community->members()->attach($user->id, ['role' => 'moderator']);
 
@@ -107,7 +107,7 @@ test('moderator can update community rules', function () {
 test('non-moderator cannot update community rules', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->putJson("/api/communities/{$community->id}", [
             'description' => 'Updated community description',
@@ -120,7 +120,7 @@ test('non-moderator cannot update community rules', function () {
 test('moderator can remove posts from community', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     // Make user a moderator
     $community->members()->attach($user->id, ['role' => 'moderator']);
 

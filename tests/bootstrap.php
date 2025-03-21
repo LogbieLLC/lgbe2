@@ -4,10 +4,10 @@ use Illuminate\Config\Repository;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\Facade;
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 // Create a new application instance
-$app = require __DIR__.'/../bootstrap/app.php';
+$app = require __DIR__ . '/../bootstrap/app.php';
 
 // Bootstrap the application
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();

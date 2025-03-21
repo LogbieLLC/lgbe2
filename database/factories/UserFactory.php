@@ -24,7 +24,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         static $increment = 1;
-        
+
         return [
             'name' => 'User ' . $increment++,
             'email' => 'user' . $increment . '@example.com',

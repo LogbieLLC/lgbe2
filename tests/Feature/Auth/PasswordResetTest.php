@@ -7,8 +7,8 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
-
 use PHPUnit\Framework\Attributes\Test;
+
 class PasswordResetTest extends TestCase
 {
     use RefreshDatabase;
@@ -40,7 +40,7 @@ class PasswordResetTest extends TestCase
         $this->post('/forgot-password', ['email' => $user->email]);
 
         Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
-            $response = $this->get('/reset-password/'.$notification->token);
+            $response = $this->get('/reset-password/' . $notification->token);
 
             $response->assertStatus(200);
 

@@ -19,7 +19,7 @@ class ProtectSuperAdminStatus
         if ($request->has('is_super_admin')) {
             $request->request->remove('is_super_admin');
         }
-        
+
         return $next($request);
     }
 }

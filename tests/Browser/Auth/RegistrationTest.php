@@ -11,18 +11,18 @@ use PHPUnit\Framework\Attributes\Test;
 class RegistrationTest extends DuskTestCase
 {
     use DatabaseMigrations;
-    
+
     /**
      * Set up the test environment.
      */
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Preserve exception handlers to prevent risky test warnings
         $this->withExceptionHandling();
     }
-    
+
     /**
      * Clean up after each test.
      */
@@ -30,7 +30,7 @@ class RegistrationTest extends DuskTestCase
     {
         // Make sure we restore exception handling before ending the test
         $this->withExceptionHandling();
-        
+
         parent::tearDown();
     }
 
