@@ -23,7 +23,7 @@ class CommentSystemTest extends DuskTestCase
      * Test that authenticated users can comment on posts.
      */
     #[Test]
-    public function test_authenticated_user_can_comment_on_post(): void
+    public function testAuthenticatedUserCanCommentOnPost(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -37,7 +37,7 @@ class CommentSystemTest extends DuskTestCase
      * Test that users can reply to comments.
      */
     #[Test]
-    public function test_user_can_reply_to_comment(): void
+    public function testUserCanReplyToComment(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -51,7 +51,7 @@ class CommentSystemTest extends DuskTestCase
      * Test that users can edit their own comments.
      */
     #[Test]
-    public function test_user_can_edit_own_comment(): void
+    public function testUserCanEditOwnComment(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
