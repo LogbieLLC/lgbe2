@@ -111,7 +111,33 @@ jobs:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
+      - name: Start Laravel Server
+        run: php artisan serve --no-reload &
+        
+      - name: Wait for server with retry logic
+        run: |
+          echo "Waiting for Laravel server to start..."
+          max_retries=5
+          retry_count=0
+          while [ $retry_count -lt $max_retries ]; do
+            if curl -s http://127.0.0.1:8000 > /dev/null; then
+              echo "Laravel server is running"
+              break
+            else
+              echo "Attempt $((retry_count+1))/$max_retries: Server not ready, waiting..."
+              sleep 5
+              retry_count=$((retry_count+1))
+            fi
+          done
+          
+          if [ $retry_count -eq $max_retries ]; then
+            echo "Failed to connect to Laravel server after $max_retries attempts"
+            exit 1
+          fi
+          
       - name: Run Pest Tests
+        env:
+          APP_URL: "http://127.0.0.1:8000"
         run: vendor/bin/pest
 
   # Step 5: Jest (Vue.js)
