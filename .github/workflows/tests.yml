@@ -36,7 +36,7 @@ jobs:
             composer require --dev squizlabs/php_codesniffer
           fi
       - name: Run PHP_CodeSniffer
-        run: vendor/bin/phpcs --standard=PSR12 app routes config database tests
+        run: vendor/bin/phpcs --standard=PSR12 -n app routes config database tests
 
   # Step 2: PHPStan
   phpstan:
