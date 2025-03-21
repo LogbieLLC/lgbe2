@@ -27,7 +27,7 @@ class CommentSystemTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('comment-test');
         });
@@ -41,7 +41,7 @@ class CommentSystemTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('reply-test');
         });
@@ -55,7 +55,7 @@ class CommentSystemTest extends DuskTestCase
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
+            $browser->visit('http://127.0.0.1:8000/')
                     ->assertSourceHas('<html')
                     ->screenshot('edit-test');
         });
