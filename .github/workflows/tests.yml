@@ -280,7 +280,18 @@ jobs:
           cat > ${FIREFOX_WRAPPER} << 'EOF'
           #!/bin/bash
           # Firefox wrapper script for Dusk tests
-          exec /usr/bin/firefox-esr "$@"
+          # This ensures Firefox runs with proper arguments for testing
+          
+          # Set user data directory to a unique location to prevent conflicts
+          USER_DATA_DIR=$(mktemp -d /tmp/firefox-profile-XXXXXX)
+          chmod 755 "$USER_DATA_DIR"
+          
+          # Run Firefox with appropriate arguments
+          exec /usr/bin/firefox-esr \
+            --profile "$USER_DATA_DIR" \
+            --no-remote \
+            --new-instance \
+            "$@"
           EOF
           chmod +x ${FIREFOX_WRAPPER}
           echo "Firefox wrapper script created successfully."
@@ -290,7 +301,7 @@ jobs:
           <?xml version="1.0" encoding="UTF-8"?>
           <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-                  bootstrap="tests/bootstrap.php"
+                  bootstrap="vendor/autoload.php"
                   colors="true">
               <testsuites>
                   <testsuite name="Browser">
@@ -299,8 +310,11 @@ jobs:
               </testsuites>
               <php>
                   <env name="APP_ENV" value="testing"/>
+                  <env name="APP_URL" value="http://127.0.0.1:8000"/>
                   <env name="DUSK_DRIVER_URL" value="http://127.0.0.1:4444"/>
                   <env name="FIREFOX_BINARY_PATH" value="/usr/bin/firefox-esr"/>
+                  <env name="DB_CONNECTION" value="sqlite"/>
+                  <env name="DB_DATABASE" value=":memory:"/>
               </php>
           </phpunit>
           EOF
@@ -308,6 +322,9 @@ jobs:
           # Set environment variable for Firefox binary path
           export FIREFOX_BINARY_PATH="/usr/bin/firefox-esr"
           echo "Firefox binary path: ${FIREFOX_BINARY_PATH}"
+          
+          # Verify database is properly migrated before running tests
+          php artisan migrate:fresh --env=testing --force
           
           # Run tests with custom configuration
           php artisan dusk --configuration=phpunit.dusk.xml
