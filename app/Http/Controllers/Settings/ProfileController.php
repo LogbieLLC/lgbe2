@@ -51,6 +51,13 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // Prevent deletion of super admin users
+        if ($user->is_super_admin) {
+            return back()->withErrors([
+                'delete' => 'Super admin accounts cannot be deleted through this interface.'
+            ]);
+        }
+
         Auth::logout();
 
         $user->delete();
