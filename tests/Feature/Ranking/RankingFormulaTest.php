@@ -16,7 +16,7 @@ class RankingFormulaTest extends TestCase
     use RefreshDatabase;
 
     #[Test]
-    public function ranking_formula_correctly_applies_time_decay_and_vote_weighting()
+    public function rankingFormulaCorrectlyAppliesTimeDecayAndVoteWeighting()
     {
     // Create a community
         $community = Community::factory()->create();
@@ -147,7 +147,7 @@ class RankingFormulaTest extends TestCase
     }
 
     #[Test]
-    public function ranking_handles_zero_and_negative_scores_correctly()
+    public function rankingHandlesZeroAndNegativeScoresCorrectly()
     {
     // Create a community
         $community = Community::factory()->create();
@@ -257,7 +257,7 @@ class RankingFormulaTest extends TestCase
     }
 
     #[Test]
-    public function ranking_handles_significant_time_decay_for_old_posts_correctly()
+    public function rankingHandlesSignificantTimeDecayForOldPostsCorrectly()
     {
     // Create a community
         $community = Community::factory()->create();
@@ -339,7 +339,7 @@ class RankingFormulaTest extends TestCase
     }
 
     #[Test]
-    public function ranking_handles_posts_with_identical_weighted_scores()
+    public function rankingHandlesPostsWithIdenticalWeightedScores()
     {
     // Create a community
         $community = Community::factory()->create();
