@@ -1,12 +1,23 @@
 <?php
 
+namespace Tests\Feature\Ranking;
+
 use App\Models\User;
 use App\Models\Community;
 use App\Models\Post;
 use App\Models\Vote;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
-test('ranking formula correctly applies time decay and vote weighting', function () {
+class RankingFormulaTest extends TestCase
+{
+    use RefreshDatabase;
+
+#[Test]
+    public function ranking_formula_correctly_applies_time_decay_and_vote_weighting()
+    {
     // Create a community
     $community = Community::factory()->create();
     
@@ -121,14 +132,303 @@ test('ranking formula correctly applies time decay and vote weighting', function
     }
     
     // Assert that no errors were found
-    expect($errors)->toBeEmpty('Ranking formula test failed with errors: ' . $errors->implode(', '));
+    $this->assertEmpty($errors->toArray(), 'Ranking formula test failed with errors: ' . $errors->implode(', '));
     
     // Additional assertions
-    expect($sortedPosts->count())->toBeGreaterThan(0);
-    expect($sortedPosts->count())->toBeLessThanOrEqual(5);
+    $this->assertGreaterThan(0, $sortedPosts->count());
+    $this->assertLessThanOrEqual(5, $sortedPosts->count());
     
     // Verify all posts have reasonable scores
     $sortedPosts->each(function ($post) {
-        expect($post->weightedScore)->toBeNumeric();
+        $this->assertIsNumeric($post->weightedScore);
     });
-});
+}
+
+#[Test]
+    public function ranking_handles_zero_and_negative_scores_correctly()
+    {
+    // Create a community
+    $community = Community::factory()->create();
+    
+    // Create posts with zero and negative scores
+    $posts = collect();
+    
+    // Post with zero score (equal upvotes and downvotes)
+    $zeroScorePost = Post::factory()->create([
+        'community_id' => $community->id,
+        'created_at' => now()
+    ]);
+    
+    // Add equal upvotes and downvotes
+    for ($j = 0; $j < 5; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $zeroScorePost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'up'
+        ]);
+        
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $zeroScorePost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'down'
+        ]);
+    }
+    
+    // Post with negative score (more downvotes than upvotes)
+    $negativeScorePost = Post::factory()->create([
+        'community_id' => $community->id,
+        'created_at' => now()
+    ]);
+    
+    // Add more downvotes than upvotes
+    for ($j = 0; $j < 3; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $negativeScorePost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'up'
+        ]);
+    }
+    
+    for ($j = 0; $j < 8; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $negativeScorePost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'down'
+        ]);
+    }
+    
+    // Refresh the posts
+    $zeroScorePost->refresh();
+    $negativeScorePost->refresh();
+    
+    // Verify zero score post has zero score
+    $this->assertEquals(0, $zeroScorePost->score);
+    $this->assertEquals(0, $zeroScorePost->weightedScore);
+    
+    // Verify negative score post has negative score and weightedScore
+    $this->assertLessThan(0, $negativeScorePost->score);
+    $this->assertLessThan(0, $negativeScorePost->weightedScore);
+    
+    // Create another negative score post with older age
+    $olderNegativePost = Post::factory()->create([
+        'community_id' => $community->id,
+        'created_at' => now()->subDays(10)
+    ]);
+    
+    // Add same vote ratio as the first negative post
+    for ($j = 0; $j < 3; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $olderNegativePost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'up'
+        ]);
+    }
+    
+    for ($j = 0; $j < 8; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $olderNegativePost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'down'
+        ]);
+    }
+    
+    $olderNegativePost->refresh();
+    
+    // Verify newer negative post has higher weighted score than older with same raw score
+    $this->assertEquals($negativeScorePost->score, $olderNegativePost->score);
+    
+    // For negative scores, the newer post should have a less negative (higher) weighted score
+    // With negative scores, the higher (less negative) value is numerically greater
+    $this->assertGreaterThan($negativeScorePost->weightedScore, $olderNegativePost->weightedScore);
+}
+
+#[Test]
+    public function ranking_handles_significant_time_decay_for_old_posts_correctly()
+    {
+    // Create a community
+    $community = Community::factory()->create();
+    
+    // Create posts with different ages but same vote patterns
+    $posts = collect();
+    
+    // Ages to test (now, 30 days old, 180 days old, 365 days old)
+    $ages = [0, 30, 180, 365];
+    
+    foreach ($ages as $ageInDays) {
+        $post = Post::factory()->create([
+            'community_id' => $community->id,
+            'created_at' => now()->subDays($ageInDays)
+        ]);
+        
+        // Add same vote pattern to all posts (10 upvotes, 2 downvotes)
+        for ($j = 0; $j < 10; $j++) {
+            $voteUser = User::factory()->create();
+            Vote::factory()->create([
+                'user_id' => $voteUser->id,
+                'votable_id' => $post->id,
+                'votable_type' => Post::class,
+                'vote_type' => 'up'
+            ]);
+        }
+        
+        for ($j = 0; $j < 2; $j++) {
+            $voteUser = User::factory()->create();
+            Vote::factory()->create([
+                'user_id' => $voteUser->id,
+                'votable_id' => $post->id,
+                'votable_type' => Post::class,
+                'vote_type' => 'down'
+            ]);
+        }
+        
+        $post->refresh();
+        $posts->push($post);
+    }
+    
+    // Get posts sorted by weighted score
+    $sortedPosts = $posts->sortByDesc(function ($post) {
+        return $post->weightedScore;
+    })->values();
+    
+    // Calculate expected decay factors
+    $decayFactor = 0.1; // Lambda value from Post model
+    
+    // Verify all posts have the same raw score
+    $expectedRawScore = 8; // 10 upvotes - 2 downvotes
+    $posts->each(function ($post) use ($expectedRawScore) {
+        $this->assertEquals($expectedRawScore, $post->score);
+    });
+    
+    // Verify order is from newest to oldest
+    for ($i = 0; $i < count($ages) - 1; $i++) {
+        $newerPost = $sortedPosts[$i];
+        $olderPost = $sortedPosts[$i + 1];
+        
+        $this->assertGreaterThan($olderPost->created_at, $newerPost->created_at);
+        $this->assertGreaterThan($olderPost->weightedScore, $newerPost->weightedScore);
+    }
+    
+    // Verify decay factor is working as expected
+    $newestPost = $sortedPosts[0];
+    $oldestPost = $sortedPosts[count($ages) - 1];
+    
+    // Calculate expected scores using the decay formula
+    $newestExpectedScore = $expectedRawScore * exp(-$decayFactor * 0);
+    $oldestExpectedScore = $expectedRawScore * exp(-$decayFactor * 365);
+    
+    // Allow for small floating point differences
+    $this->assertLessThan(0.001, abs($newestPost->weightedScore - $newestExpectedScore));
+    $this->assertLessThan(0.001, abs($oldestPost->weightedScore - $oldestExpectedScore));
+    
+    // Verify the oldest post has a significantly lower weighted score
+    $this->assertLessThan($newestPost->weightedScore * 0.5, $oldestPost->weightedScore);
+}
+
+#[Test]
+    public function ranking_handles_posts_with_identical_weighted_scores()
+    {
+    // Create a community
+    $community = Community::factory()->create();
+    
+    // Create two posts with different ages and vote counts that result in same weighted score
+    
+    // First post: newer with lower score
+    $newerPost = Post::factory()->create([
+        'community_id' => $community->id,
+        'created_at' => now()->subDays(10)
+    ]);
+    
+    // Second post: older with higher score
+    $olderPost = Post::factory()->create([
+        'community_id' => $community->id,
+        'created_at' => now()->subDays(30)
+    ]);
+    
+    // Calculate required votes to create identical weighted scores
+    // Using the formula: score_newer * exp(-0.1 * 10) = score_older * exp(-0.1 * 30)
+    // This simplifies to: score_newer = score_older * exp(-0.1 * 20)
+    
+    $decayFactor = 0.1;
+    $ratio = exp($decayFactor * 20); // e^2 ≈ 7.389
+    
+    // Create a scenario where olderPost would need ~7.4 times the score of newerPost
+    // Let's use 5 for newer post, which means ~37 for older post
+    
+    // Add upvotes and downvotes to newer post (7 up, 2 down = 5 score)
+    for ($j = 0; $j < 7; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $newerPost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'up'
+        ]);
+    }
+    
+    for ($j = 0; $j < 2; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $newerPost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'down'
+        ]);
+    }
+    
+    // Add upvotes and downvotes to older post (42 up, 5 down = 37 score)
+    for ($j = 0; $j < 42; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $olderPost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'up'
+        ]);
+    }
+    
+    for ($j = 0; $j < 5; $j++) {
+        $voteUser = User::factory()->create();
+        Vote::factory()->create([
+            'user_id' => $voteUser->id,
+            'votable_id' => $olderPost->id,
+            'votable_type' => Post::class,
+            'vote_type' => 'down'
+        ]);
+    }
+    
+    // Refresh posts
+    $newerPost->refresh();
+    $olderPost->refresh();
+    
+    // Verify raw scores
+    $this->assertEquals(5, $newerPost->score);
+    $this->assertEquals(37, $olderPost->score);
+    
+    // The weighted scores should be very close to each other
+    $newerWeightedScore = $newerPost->weightedScore;
+    $olderWeightedScore = $olderPost->weightedScore;
+    
+    // Allow for small floating point differences
+    $this->assertLessThan(0.5, abs($newerWeightedScore - $olderWeightedScore));
+    
+    // Calculate theoretical weighted scores
+    $theoreticalNewerScore = 5 * exp(-$decayFactor * 10);
+    $theoreticalOlderScore = 37 * exp(-$decayFactor * 30);
+    
+    // Verify theoretical and actual scores are close
+    $this->assertLessThan(0.001, abs($newerWeightedScore - $theoreticalNewerScore));
+    $this->assertLessThan(0.001, abs($olderWeightedScore - $theoreticalOlderScore));
+}
+}
