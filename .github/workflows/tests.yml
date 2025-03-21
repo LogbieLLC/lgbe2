@@ -110,7 +110,13 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
-        run: php artisan migrate --force
+        run: |
+          # Ensure database is properly configured
+          php artisan config:clear
+          php artisan migrate:fresh --force
+          # Verify migrations ran successfully
+          echo "Verifying database tables..."
+          php artisan db:show
       - name: Start Laravel Server
         run: php artisan serve --no-reload &
         
@@ -185,7 +191,13 @@ jobs:
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
-        run: php artisan migrate --force
+        run: |
+          # Ensure database is properly configured
+          php artisan config:clear
+          php artisan migrate:fresh --force
+          # Verify migrations ran successfully
+          echo "Verifying database tables..."
+          php artisan db:show
       - name: Publish Dusk Assets
         run: |
           php artisan vendor:publish --provider="Laravel\Dusk\DuskServiceProvider"
