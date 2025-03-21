@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Hash;
 
 test('make:super-admin command can create a new super admin user', function () {
     // Run the command to create a super admin
-    artisan('make:super-admin', [
+    $this->artisan('make:super-admin', [
         '--create' => true,
         '--name' => 'Test Super Admin',
         '--username' => 'testsuperadmin',
@@ -31,7 +31,7 @@ test('make:super-admin command can promote existing user to super admin', functi
     ]);
 
     // Run the command to promote the user to super admin
-    artisan('make:super-admin', [
+    $this->artisan('make:super-admin', [
         '--email' => 'regularuser@example.com'
     ])->assertSuccessful();
 
@@ -48,7 +48,7 @@ test('delete:super-admin command can delete a super admin user', function () {
     ]);
 
     // Run the command to delete the super admin with confirmation
-    artisan('delete:super-admin', [
+    $this->artisan('delete:super-admin', [
         'email' => 'superadmintodelete@example.com'
     ])->expectsConfirmation('Are you sure you want to delete super admin ' . $user->name . ' (superadmintodelete@example.com)?', 'yes')
       ->assertSuccessful();
@@ -67,7 +67,7 @@ test('delete:super-admin command fails for non-super admin users', function () {
     ]);
 
     // Run the command to delete the user
-    artisan('delete:super-admin', [
+    $this->artisan('delete:super-admin', [
         'email' => 'regularuser@example.com'
     ])->assertExitCode(1);
 

@@ -8,7 +8,7 @@ use Illuminate\Validation\ValidationException;
 
 test('super admin can be created via artisan command', function () {
     // Run the command to create a super admin
-    artisan('make:super-admin', [
+    $this->artisan('make:super-admin', [
         '--create' => true,
         '--name' => 'Test Super Admin',
         '--username' => 'testsuperadmin',
@@ -101,7 +101,7 @@ test('super admin account can be unlocked via artisan command', function () {
     ]);
 
     // Run the command to unlock the super admin
-    artisan('unlock:super-admin', [
+    $this->artisan('unlock:super-admin', [
         'email' => 'unlocktestadmin@example.com',
         '--password' => 'new_password123'
     ])->assertSuccessful();
