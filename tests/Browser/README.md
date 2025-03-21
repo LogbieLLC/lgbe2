@@ -47,6 +47,7 @@ We provide scripts for running the tests on both Windows and Linux:
 
 - **Windows**: Run `run-dusk-tests.bat` from the project root
 - **Linux/macOS**: Run `./run-dusk-tests.sh` from the project root (make sure it's executable with `chmod +x run-dusk-tests.sh`)
+- **Cross-platform**: Run `python run-dusk-tests.py` from the project root
 
 ## Exception Handler Management
 
