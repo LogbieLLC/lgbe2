@@ -24,6 +24,9 @@ class User extends Authenticatable
         'email',
         'password',
         'karma',
+        'is_super_admin',
+        'login_attempts',
+        'locked_at',
     ];
 
     /**
@@ -46,6 +49,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_super_admin' => 'boolean',
+            'login_attempts' => 'integer',
+            'locked_at' => 'datetime',
         ];
     }
     
@@ -117,5 +123,13 @@ class User extends Authenticatable
     public function receivedBans()
     {
         return $this->hasMany(Ban::class);
+    }
+    
+    /**
+     * Check if the user is a super admin.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->is_super_admin;
     }
 }
