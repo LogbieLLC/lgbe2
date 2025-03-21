@@ -20,6 +20,7 @@ This document outlines our comprehensive testing policy, with a clear separation
 7. [Test Performance](#test-performance)
 8. [Windows-Specific Considerations](#windows-specific-considerations)
 9. [Continuous Integration](#continuous-integration)
+10. [Testing Order of Operations](#testing-order-of-operations)
 
 ## Introduction
 
@@ -361,6 +362,45 @@ UI tests are run on every pull request. They verify that the application's user 
 ### Code Coverage
 
 We track code coverage to ensure that our tests cover a significant portion of the codebase. We aim for at least 80% code coverage for critical components.
+
+## Testing Order of Operations
+
+To maintain a high-quality codebase, our testing process follows a deliberate sequence that progresses from rapid, static checks to thorough, dynamic tests. This order ensures we can efficiently catch and resolve issues—starting with the simplest problems and building toward full-system validation. Below is the testing order, complete with explanations for each step and the reasoning behind the sequence.
+
+### Testing Steps
+
+1. **PHP_CodeSniffer (GitHub)**  
+   - **Purpose**: Enforces coding standards for PHP, ensuring the code is consistent, readable, and adheres to best practices.  
+   - **Why Here**: As a fast, static check, it identifies style issues early without executing the code, allowing quick fixes before deeper analysis.
+
+2. **phpstan**  
+   - **Purpose**: Performs static analysis on PHP code to uncover potential bugs, type errors, and logical inconsistencies.  
+   - **Why Here**: Following code style checks, this quick, execution-free step catches deeper issues in PHP code, setting a solid foundation for testing.
+
+3. **eslint (Vue.js)**  
+   - **Purpose**: Lints JavaScript code within Vue.js components to enforce coding standards and flag common errors.  
+   - **Why Here**: Similar to PHP_CodeSniffer but for JavaScript, this step ensures frontend code quality before moving to functional tests.
+
+4. **pest**  
+   - **Purpose**: Runs unit and integration tests for PHP code to verify that individual components and their interactions work correctly.  
+   - **Why Here**: With style and static issues resolved, pest confirms the PHP logic is sound before testing broader integrations.
+
+5. **jest (Vue.js)**  
+   - **Purpose**: Executes unit tests for JavaScript code in Vue.js components, ensuring they function as expected in isolation.  
+   - **Why Here**: After PHP tests, this step validates the frontend logic, preparing the codebase for end-to-end testing.
+
+6. **dusk (PHP Laravel E2E)**  
+   - **Purpose**: Conducts end-to-end tests for the Laravel application, simulating user interactions to validate the entire system.  
+   - **Why Here**: As the most resource-intensive step, it runs last to confirm full integration after all components are individually verified.
+
+### Why This Order?
+The sequence is optimized for efficiency and early error detection:
+
+- **Static Checks First (Steps 1-3)**: Tools like PHP_CodeSniffer, phpstan, and eslint run quickly and don't require code execution. They catch code style violations and potential bugs in both PHP and JavaScript, preventing wasted time on tests if basic issues exist.
+- **Component Testing Next (Steps 4-5)**: Pest and Jest verify the functionality of PHP and JavaScript components, respectively. These tests ensure individual pieces work before testing their integration.
+- **Full-System Validation Last (Step 6)**: Dusk's end-to-end tests are slower and more complex, so they're reserved for the final stage, confirming the entire application works seamlessly.
+
+This approach—starting with fast, simple checks and ending with comprehensive tests—helps identify issues early, optimize resources, and maintain a reliable, well-tested codebase.
 
 ## Conclusion
 

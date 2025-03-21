@@ -14,15 +14,43 @@ A Reddit-like social media platform built with Laravel and Vue.js.
 
 ## Testing
 
-### Static Analysis with PHPStan
+### Testing Order of Operations
 
-The project uses PHPStan for static code analysis to catch potential bugs and errors:
+Our testing process follows this deliberate sequence:
 
-```bash
-composer phpstan
-```
+1. **PHP_CodeSniffer**
+   ```bash
+   composer phpcs
+   ```
 
-For more information about the PHPStan configuration, see [phpstan-readme.md](phpstan-readme.md).
+2. **Static Analysis with PHPStan**
+   ```bash
+   composer phpstan
+   ```
+
+3. **ESLint (Vue.js)**
+   ```bash
+   npm run lint
+   ```
+
+4. **Pest Tests**
+   ```bash
+   vendor/bin/pest
+   ```
+
+5. **Jest Tests (Vue.js)**
+   ```bash
+   npm test
+   ```
+
+6. **End-to-End Tests with Laravel Dusk**
+   ```bash
+   ./run-dusk-tests.sh
+   ```
+   Or on Windows:
+   ```bash
+   run-dusk-tests.bat
+   ```
 
 ### Feature Tests
 
