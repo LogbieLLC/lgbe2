@@ -23,7 +23,7 @@ class PostCreationTest extends DuskTestCase
      * Test that authenticated users can create posts.
      */
     #[Test]
-    public function test_authenticated_user_can_create_post(): void
+    public function testAuthenticatedUserCanCreatePost(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -37,7 +37,7 @@ class PostCreationTest extends DuskTestCase
      * Test that unauthenticated users are redirected.
      */
     #[Test]
-    public function test_unauthenticated_users_redirected(): void
+    public function testUnauthenticatedUsersRedirected(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -51,7 +51,7 @@ class PostCreationTest extends DuskTestCase
      * Test post form validation.
      */
     #[Test]
-    public function test_post_form_validation(): void
+    public function testPostFormValidation(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
@@ -65,7 +65,7 @@ class PostCreationTest extends DuskTestCase
      * Test that posts appear in the community.
      */
     #[Test]
-    public function test_post_appears_in_community(): void
+    public function testPostAppearsInCommunity(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
