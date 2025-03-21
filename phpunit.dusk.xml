@@ -17,8 +17,10 @@
     </testsuites>
     <php>
         <env name="APP_ENV" value="testing"/>
-        <env name="DUSK_DRIVER_URL" value="http://localhost:4444"/>
-        <env name="DUSK_WINDOWS_MODE" value="true"/>
-        <env name="APP_URL" value="http://localhost:8000"/>
+        <env name="DUSK_DRIVER_URL" value="http://127.0.0.1:4444"/>
+        <env name="APP_URL" value="http://127.0.0.1:8000"/>
+        <env name="FIREFOX_BINARY_PATH" value="/usr/bin/firefox"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
     </php>
 </phpunit>
