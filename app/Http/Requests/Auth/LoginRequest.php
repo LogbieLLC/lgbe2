@@ -40,15 +40,57 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
-
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
-
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+        
+        // Check if user exists and is a super admin
+        $user = \App\Models\User::where('email', $this->input('email'))->first();
+        
+        if ($user && $user->is_super_admin) {
+            // Check if super admin account is locked
+            if ($user->locked_at) {
+                throw ValidationException::withMessages([
+                    'email' => 'This super admin account is locked. Please use the unlock:super-admin command to unlock it.',
+                ]);
+            }
+            
+            // Attempt authentication
+            if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+                // Increment login attempts for super admin
+                $user->login_attempts += 1;
+                
+                // Lock account and wipe password after 5 failed attempts
+                if ($user->login_attempts >= 5) {
+                    $user->locked_at = now();
+                    $user->password = bcrypt(Str::random(64)); // Wipe password with random string
+                    $user->save();
+                    
+                    throw ValidationException::withMessages([
+                        'email' => 'This super admin account has been locked due to too many failed login attempts. Please use the unlock:super-admin command to unlock it.',
+                    ]);
+                }
+                
+                $user->save();
+                
+                RateLimiter::hit($this->throttleKey());
+                
+                throw ValidationException::withMessages([
+                    'email' => trans('auth.failed') . ' Remaining attempts: ' . (5 - $user->login_attempts),
+                ]);
+            }
+            
+            // Reset login attempts on successful login
+            $user->login_attempts = 0;
+            $user->save();
+        } else {
+            // Regular authentication for non-super admin users
+            if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+                RateLimiter::hit($this->throttleKey());
+                
+                throw ValidationException::withMessages([
+                    'email' => trans('auth.failed'),
+                ]);
+            }
         }
-
+        
         RateLimiter::clear($this->throttleKey());
     }
 

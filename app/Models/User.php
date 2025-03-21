@@ -25,6 +25,8 @@ class User extends Authenticatable
         'password',
         'karma',
         'is_super_admin',
+        'login_attempts',
+        'locked_at',
     ];
 
     /**
@@ -48,6 +50,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_super_admin' => 'boolean',
+            'login_attempts' => 'integer',
+            'locked_at' => 'datetime',
         ];
     }
     

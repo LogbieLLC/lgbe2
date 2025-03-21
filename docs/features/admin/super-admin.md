@@ -7,6 +7,7 @@ The LGBE2 platform includes a super admin feature that allows designated users t
 - Super admin users can only be created through artisan commands
 - Super admin users can only be deleted through artisan commands
 - Super admin status cannot be modified through regular web interfaces
+- Super admin accounts have brute force protection (locked after 5 failed login attempts)
 
 ## Commands
 
@@ -39,6 +40,21 @@ To delete a super admin user:
 ```bash
 php artisan delete:super-admin user@example.com
 ```
+
+### Unlock a Locked Super Admin Account
+
+Super admin accounts are automatically locked after 5 failed login attempts. To unlock a locked super admin account:
+
+```bash
+php artisan unlock:super-admin user@example.com
+```
+
+You will be prompted to enter a new password for the account. Alternatively, you can provide a password directly:
+
+```bash
+php artisan unlock:super-admin user@example.com --password="new_secure_password"
+```
+
 
 ## Security Considerations
 
