@@ -17,7 +17,7 @@ test('super admin can be created via artisan command', function () {
     ])->assertSuccessful();
 
     // Check that the super admin was created in the database
-    test()->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('users', [
         'email' => 'testsuperadmin@example.com',
         'is_super_admin' => true
     ]);
@@ -83,7 +83,7 @@ test('locked super admin account cannot authenticate', function () {
     // Attempt to authenticate should throw an exception
     try {
         $request->authenticate();
-        test()->fail('Expected ValidationException was not thrown');
+        $this->fail('Expected ValidationException was not thrown');
     } catch (ValidationException $e) {
         // Check that the error message mentions the account is locked
         expect($e->errors()['email'][0])->toContain('locked');

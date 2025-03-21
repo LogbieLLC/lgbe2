@@ -5,8 +5,4 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(TestCase::class, RefreshDatabase::class)->in(__DIR__);
 
-// Add helper to access artisan commands
-function artisan($command, $parameters = [])
-{
-    return test()->artisan($command, $parameters);
-}
+// Helper functions are not needed as we're using $this in the test closures

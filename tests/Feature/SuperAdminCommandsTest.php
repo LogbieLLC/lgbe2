@@ -15,7 +15,7 @@ test('make:super-admin command can create a new super admin user', function () {
     ])->assertSuccessful();
 
     // Check that the super admin was created in the database
-    test()->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('users', [
         'name' => 'Test Super Admin',
         'username' => 'testsuperadmin',
         'email' => 'testsuperadmin@example.com',
@@ -54,7 +54,7 @@ test('delete:super-admin command can delete a super admin user', function () {
       ->assertSuccessful();
 
     // Check that the super admin was deleted from the database
-    test()->assertDatabaseMissing('users', [
+    $this->assertDatabaseMissing('users', [
         'email' => 'superadmintodelete@example.com'
     ]);
 });
@@ -72,7 +72,7 @@ test('delete:super-admin command fails for non-super admin users', function () {
     ])->assertExitCode(1);
 
     // Check that the user still exists in the database
-    test()->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('users', [
         'email' => 'regularuser@example.com'
     ]);
 });
@@ -85,12 +85,12 @@ test('super admin users cannot be deleted through web interface', function () {
     ]);
 
     // Attempt to delete through profile controller
-    test()->actingAs($user)
+    $this->actingAs($user)
          ->delete('/profile')
          ->assertSessionHasErrors('delete');
 
     // Check that the super admin still exists in the database
-    test()->assertDatabaseHas('users', [
+    $this->assertDatabaseHas('users', [
         'email' => 'superadmin@example.com'
     ]);
 });
@@ -103,7 +103,7 @@ test('middleware prevents modification of super admin status', function () {
     ]);
 
     // Attempt to update user profile with is_super_admin set to false
-    test()->actingAs($user)
+    $this->actingAs($user)
          ->patch('/profile', [
              'name' => 'Updated Name',
              'is_super_admin' => false
