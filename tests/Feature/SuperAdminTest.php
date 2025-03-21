@@ -17,7 +17,7 @@ test('super admin can be created via artisan command', function () {
     ])->assertSuccessful();
 
     // Check that the super admin was created in the database
-    $this->assertDatabaseHas('users', [
+    test()->assertDatabaseHas('users', [
         'email' => 'testsuperadmin@example.com',
         'is_super_admin' => true
     ]);

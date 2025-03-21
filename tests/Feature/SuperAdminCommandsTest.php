@@ -15,7 +15,7 @@ test('make:super-admin command can create a new super admin user', function () {
     ])->assertSuccessful();
 
     // Check that the super admin was created in the database
-    $this->assertDatabaseHas('users', [
+    test()->assertDatabaseHas('users', [
         'name' => 'Test Super Admin',
         'username' => 'testsuperadmin',
         'email' => 'testsuperadmin@example.com',
@@ -54,7 +54,7 @@ test('delete:super-admin command can delete a super admin user', function () {
       ->assertSuccessful();
 
     // Check that the super admin was deleted from the database
-    $this->assertDatabaseMissing('users', [
+    test()->assertDatabaseMissing('users', [
         'email' => 'superadmintodelete@example.com'
     ]);
 });
@@ -72,7 +72,7 @@ test('delete:super-admin command fails for non-super admin users', function () {
     ])->assertExitCode(1);
 
     // Check that the user still exists in the database
-    $this->assertDatabaseHas('users', [
+    test()->assertDatabaseHas('users', [
         'email' => 'regularuser@example.com'
     ]);
 });
@@ -90,7 +90,7 @@ test('super admin users cannot be deleted through web interface', function () {
          ->assertSessionHasErrors('delete');
 
     // Check that the super admin still exists in the database
-    $this->assertDatabaseHas('users', [
+    test()->assertDatabaseHas('users', [
         'email' => 'superadmin@example.com'
     ]);
 });
