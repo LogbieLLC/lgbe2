@@ -12,7 +12,7 @@ class HomePageTest extends DuskTestCase
      * Test that the home page loads.
      */
     #[Test]
-    public function test_home_page_loads(): void
+    public function testHomePageLoads(): void
     {
         $this->withoutExceptionHandling();
         $this->browse(function (Browser $browser) {
