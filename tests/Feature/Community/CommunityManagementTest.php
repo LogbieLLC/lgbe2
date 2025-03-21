@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Models\Community;
 use App\Models\CommunityUser;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 test('user can create a community', function () {
     $user = User::factory()->create();

@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Models\Community;
 use App\Models\Post;
 use App\Models\Comment;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 test('user can search communities', function () {
     $user = User::factory()->create();

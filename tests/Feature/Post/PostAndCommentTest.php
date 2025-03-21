@@ -5,6 +5,7 @@ use App\Models\Community;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Vote;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 test('user can create a post in a community', function () {
     $user = User::factory()->create();

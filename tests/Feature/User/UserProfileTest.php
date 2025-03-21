@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Vote;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 test('user can view their profile', function () {
     $user = User::factory()->create();

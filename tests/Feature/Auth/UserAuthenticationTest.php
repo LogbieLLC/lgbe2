@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 test('user can register with valid data', function () {
     $response = $this->postJson('/api/auth/register', [
