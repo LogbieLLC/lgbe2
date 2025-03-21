@@ -12,7 +12,7 @@ class SimpleTest extends DuskTestCase
      * A basic browser test example.
      */
     #[Test]
-    public function basic_example()
+    public function basicExample()
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('http://localhost:8000')
