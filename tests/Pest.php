@@ -6,7 +6,4 @@ pest()->extend(Tests\DuskTestCase::class)
 
 uses(Tests\TestCase::class)->in('Feature');
 
-function artisan($command, $parameters = [])
-{
-    return test()->artisan($command, $parameters);
-}
+// Helper functions are not needed as we're using $this in the test closures
