@@ -7,7 +7,7 @@ use App\Models\Vote;
 
 test('user can view their profile', function () {
     $user = User::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->getJson("/api/users/{$user->id}");
 
@@ -27,14 +27,14 @@ test('user karma is calculated correctly from post votes', function () {
     $post = Post::factory()->create([
         'user_id' => $user->id
     ]);
-    
+
     // Create upvotes
     Vote::factory()->count(5)->create([
         'votable_id' => $post->id,
         'votable_type' => Post::class,
         'vote_type' => 'up'
     ]);
-    
+
     // Create downvotes
     Vote::factory()->count(2)->create([
         'votable_id' => $post->id,
@@ -56,14 +56,14 @@ test('user karma is calculated correctly from comment votes', function () {
         'post_id' => $post->id,
         'user_id' => $user->id
     ]);
-    
+
     // Create upvotes
     Vote::factory()->count(3)->create([
         'votable_id' => $comment->id,
         'votable_type' => Comment::class,
         'vote_type' => 'up'
     ]);
-    
+
     // Create downvotes
     Vote::factory()->count(1)->create([
         'votable_id' => $comment->id,
@@ -80,7 +80,7 @@ test('user karma is calculated correctly from comment votes', function () {
 
 test('user can update their profile information', function () {
     $user = User::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->putJson("/api/users/{$user->id}", [
             'username' => 'newusername',
@@ -102,7 +102,7 @@ test('user can update their profile information', function () {
 test('user cannot update another user\'s profile', function () {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->putJson("/api/users/{$otherUser->id}", [
             'username' => 'newusername',
@@ -126,7 +126,7 @@ test('user can view their posts', function () {
     Post::factory()->count(3)->create([
         'user_id' => $user->id
     ]);
-    
+
     $response = $this->actingAs($user)
         ->getJson("/api/users/{$user->id}/posts");
 
@@ -141,7 +141,7 @@ test('user can view their comments', function () {
         'post_id' => $post->id,
         'user_id' => $user->id
     ]);
-    
+
     $response = $this->actingAs($user)
         ->getJson("/api/users/{$user->id}/comments");
 
@@ -154,23 +154,23 @@ test('user karma updates in real-time after vote', function () {
     $post = Post::factory()->create([
         'user_id' => $user->id
     ]);
-    
+
     // Initial karma check
     $initialResponse = $this->actingAs($user)
         ->getJson("/api/users/{$user->id}");
     $initialKarma = $initialResponse->json('karma');
-    
+
     // Add an upvote
     Vote::factory()->create([
         'votable_id' => $post->id,
         'votable_type' => Post::class,
         'vote_type' => 'up'
     ]);
-    
+
     // Check updated karma
     $updatedResponse = $this->actingAs($user)
         ->getJson("/api/users/{$user->id}");
     $updatedKarma = $updatedResponse->json('karma');
-    
+
     $this->assertEquals($initialKarma + 1, $updatedKarma);
 }); 
