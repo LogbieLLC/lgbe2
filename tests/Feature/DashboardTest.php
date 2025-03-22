@@ -5,19 +5,19 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-
 use PHPUnit\Framework\Attributes\Test;
+
 class DashboardTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guests_are_redirected_to_the_login_page()
+    public function testGuestsAreRedirectedToTheLoginPage()
     {
         $response = $this->get('/dashboard');
         $response->assertRedirect('/login');
     }
 
-    public function test_authenticated_users_can_visit_the_dashboard()
+    public function testAuthenticatedUsersCanVisitTheDashboard()
     {
         $user = User::factory()->create();
         $this->actingAs($user);
