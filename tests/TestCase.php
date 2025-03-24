@@ -43,14 +43,14 @@ abstract class TestCase extends BaseTestCase
     {
         // First call parent tearDown to ensure proper cleanup
         parent::tearDown();
-        
+
         // Restore error and exception handlers using Laravel's method
         $this->flushHandlersState();
     }
-    
+
     /**
      * Flush the error and exception handlers state.
-     * 
+     *
      * This is based on Laravel's HandleExceptions::flushHandlersState method.
      *
      * @return void
@@ -59,27 +59,28 @@ abstract class TestCase extends BaseTestCase
     {
         // Restore all exception handlers
         while (true) {
-            $previousHandler = set_exception_handler(function (\Throwable $e) {});
+            $previousHandler = set_exception_handler(function (\Throwable $e) {
+            });
             restore_exception_handler();
-            
+
             if ($previousHandler === null) {
                 break;
             }
-            
+
             restore_exception_handler();
         }
-        
+
         // Restore all error handlers
         while (true) {
             $previousHandler = set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline): bool {
                 return true;
             });
             restore_error_handler();
-            
+
             if ($previousHandler === null) {
                 break;
             }
-            
+
             restore_error_handler();
         }
     }
