@@ -202,7 +202,7 @@ class PostController extends Controller
         if (!Auth::check()) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        
+
         $request->validate([
             'vote_type' => ['required', 'in:up,down'],
         ]);

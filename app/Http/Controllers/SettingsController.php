@@ -45,7 +45,7 @@ class SettingsController extends Controller
 
         return redirect('/settings/profile')->with('success', 'Profile updated successfully');
     }
-    
+
     /**
      * Delete the user's account.
      */

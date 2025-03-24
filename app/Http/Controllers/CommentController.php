@@ -33,7 +33,7 @@ class CommentController extends Controller
         if (!Auth::check()) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        
+
         $validated = $request->validate([
             'content' => 'required|string|max:9999',
             'parent_comment_id' => 'nullable|exists:comments,id',
