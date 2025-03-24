@@ -19,9 +19,16 @@ abstract class TestCase extends BaseTestCase
         // Mock Vite to prevent ViteManifestNotFoundException
         $this->withoutVite();
 
-        // Run migrations for in-memory database
-        if (config('database.default') === 'sqlite' && config('database.connections.sqlite.database') === ':memory:') {
-            $this->artisan('migrate:fresh');
+        // Create SQLite database file if it doesn't exist
+        $databasePath = database_path('database.sqlite');
+        $databaseDir = dirname($databasePath);
+
+        if (!file_exists($databaseDir)) {
+            mkdir($databaseDir, 0777, true);
+        }
+
+        if (!file_exists($databasePath)) {
+            touch($databasePath);
         }
 
         // Ensure config is bound for Laravel 11
