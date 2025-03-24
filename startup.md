@@ -220,17 +220,7 @@ npm install
 npm run dev
 ```
 
-### Laravel Dusk Testing Issues
-
-If Dusk tests are failing:
-
-```bash
-# Update Chrome driver
-php artisan dusk:chrome-driver
-
-# Clear browser state
-php artisan dusk:chrome-driver --all
-```
+<!-- Laravel Dusk Testing section removed -->
 
 ### General Troubleshooting
 
