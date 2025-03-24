@@ -33,7 +33,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -49,7 +49,7 @@ class RegisteredUserController extends Controller
 
         return to_route('dashboard');
     }
-    
+
     /**
      * Handle an incoming API registration request.
      *
@@ -59,7 +59,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'username' => 'required|string|max:255|unique:users,name',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 

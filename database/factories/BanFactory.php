@@ -19,7 +19,7 @@ class BanFactory extends Factory
     public function definition(): array
     {
         static $increment = 1;
-        
+
         return [
             'user_id' => User::factory(),
             'community_id' => Community::factory(),

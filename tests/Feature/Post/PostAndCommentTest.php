@@ -9,10 +9,10 @@ use App\Models\Vote;
 test('user can create a post in a community', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     // Make user a member of the community
     $community->members()->attach($user->id, ['role' => 'member']);
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/communities/{$community->id}/posts", [
             'title' => 'Test Post',
@@ -43,7 +43,7 @@ test('user can create a post in a community', function () {
 test('user can upvote a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/posts/{$post->id}/vote", [
             'vote_type' => 'up'
@@ -63,7 +63,7 @@ test('user can upvote a post', function () {
 test('user can change their vote on a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     // First vote up
     $this->actingAs($user)
         ->postJson("/api/posts/{$post->id}/vote", [
@@ -90,7 +90,7 @@ test('user can change their vote on a post', function () {
 test('user can comment on a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/posts/{$post->id}/comments", [
             'content' => 'This is a test comment'
@@ -119,7 +119,7 @@ test('user can reply to a comment', function () {
     $parentComment = Comment::factory()->create([
         'post_id' => $post->id
     ]);
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/posts/{$post->id}/comments", [
             'content' => 'This is a reply',
@@ -152,7 +152,7 @@ test('user can delete their own comment', function () {
         'post_id' => $post->id,
         'user_id' => $user->id
     ]);
-    
+
     $response = $this->actingAs($user)
         ->deleteJson("/api/comments/{$comment->id}");
 
@@ -172,7 +172,7 @@ test('user cannot delete another user\'s comment', function () {
         'post_id' => $post->id,
         'user_id' => $otherUser->id
     ]);
-    
+
     $response = $this->actingAs($user)
         ->deleteJson("/api/comments/{$comment->id}");
 
@@ -187,10 +187,10 @@ test('user cannot delete another user\'s comment', function () {
 test('posts are sorted by score correctly', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     // Make user a member of the community
     $community->members()->attach($user->id, ['role' => 'member']);
-    
+
     // Create two posts
     $post1 = Post::factory()->create([
         'community_id' => $community->id,

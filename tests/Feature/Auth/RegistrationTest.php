@@ -4,8 +4,8 @@ namespace Tests\Feature\Auth;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-
 use PHPUnit\Framework\Attributes\Test;
+
 class RegistrationTest extends TestCase
 {
     use RefreshDatabase;

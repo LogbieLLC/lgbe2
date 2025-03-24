@@ -173,4 +173,4 @@ test('user karma updates in real-time after vote', function () {
     $updatedKarma = $updatedResponse->json('karma');
 
     $this->assertEquals($initialKarma + 1, $updatedKarma);
-}); 
+});

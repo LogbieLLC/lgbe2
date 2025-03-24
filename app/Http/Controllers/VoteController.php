@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
 {
-    
     /**
      * Vote on a post.
      */
@@ -21,10 +20,10 @@ class VoteController extends Controller
         $validated = $request->validate([
             'vote_type' => 'required|in:up,down',
         ]);
-        
+
         return $this->handleVote($post, $validated['vote_type']);
     }
-    
+
     /**
      * Vote on a comment.
      */
@@ -33,22 +32,22 @@ class VoteController extends Controller
         $validated = $request->validate([
             'vote_type' => 'required|in:up,down',
         ]);
-        
+
         return $this->handleVote($comment, $validated['vote_type']);
     }
-    
+
     /**
      * Handle the vote for a votable model.
      */
     private function handleVote($votable, $voteType)
     {
         $user = Auth::user();
-        
+
         // Check if the user has already voted on this item
         $existingVote = $votable->votes()->where('user_id', $user->id)->first();
-        
+
         DB::beginTransaction();
-        
+
         try {
             if ($existingVote) {
                 if ($existingVote->vote_type === $voteType) {
@@ -59,11 +58,11 @@ class VoteController extends Controller
                 } else {
                     // If voting differently, update the vote
                     $existingVote->update(['vote_type' => $voteType]);
-                    
+
                     // Update karma: remove old vote effect and add new vote effect
                     $this->updateKarma($votable->user, $existingVote->vote_type, true);
                     $this->updateKarma($votable->user, $voteType, false);
-                    
+
                     $message = 'Vote updated successfully';
                 }
             } else {
@@ -72,17 +71,17 @@ class VoteController extends Controller
                     'user_id' => $user->id,
                     'vote_type' => $voteType,
                 ]);
-                
+
                 $this->updateKarma($votable->user, $voteType, false);
                 $message = 'Vote added successfully';
             }
-            
+
             DB::commit();
-            
+
             // Get updated vote counts
             $upVotes = $votable->votes()->where('vote_type', 'up')->count();
             $downVotes = $votable->votes()->where('vote_type', 'down')->count();
-            
+
             return response()->json([
                 'message' => $message,
                 'up_votes' => $upVotes,
@@ -94,19 +93,19 @@ class VoteController extends Controller
             return response()->json(['message' => 'Error processing vote: ' . $e->getMessage()], 500);
         }
     }
-    
+
     /**
      * Update the karma of a user based on a vote.
      */
     private function updateKarma(User $user, $voteType, $isRemoval)
     {
         $karmaChange = $voteType === 'up' ? 1 : -1;
-        
+
         // If removing a vote, reverse the karma change
         if ($isRemoval) {
             $karmaChange = -$karmaChange;
         }
-        
+
         $user->increment('karma', $karmaChange);
     }
 }

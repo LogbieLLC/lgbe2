@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+
 // TestCase and refreshDatabase are now used from Pest.php
 
 test('super admin can be created via artisan command', function () {
@@ -50,10 +51,10 @@ test('super admin account is locked after 5 failed login attempts', function () 
 
         // Refresh the user model
         $user->refresh();
-        
+
         // Check login attempts are incremented
         expect($user->login_attempts)->toBe($i + 1);
-        
+
         // On the last attempt, the account should be locked
         if ($i == 4) {
             expect($user->locked_at)->not->toBeNull();
@@ -112,7 +113,7 @@ test('super admin account can be unlocked via artisan command', function () {
     // Check that the account is unlocked
     expect($user->login_attempts)->toBe(0);
     expect($user->locked_at)->toBeNull();
-    
+
     // Check that the password was changed
     expect(Hash::check('new_password123', $user->password))->toBeTrue();
 });

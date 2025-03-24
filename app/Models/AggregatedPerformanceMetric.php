@@ -98,11 +98,11 @@ class AggregatedPerformanceMetric extends Model
     public function scopeForDimension($query, $dimension, $value = null)
     {
         $query = $query->where('dimension', $dimension);
-        
+
         if ($value !== null) {
             $query->where('dimension_value', $value);
         }
-        
+
         return $query;
     }
 
@@ -114,7 +114,7 @@ class AggregatedPerformanceMetric extends Model
         $threshold = PerformanceThreshold::where('metric_name', $this->metric_name)
             ->where(function ($query) {
                 $query->whereNull('url_pattern');
-                
+
                 if ($this->url_path) {
                     $query->orWhere(function ($q) {
                         // Match URL pattern if specified
@@ -125,7 +125,7 @@ class AggregatedPerformanceMetric extends Model
             })
             ->where(function ($query) {
                 $query->whereNull('device_type');
-                
+
                 if ($this->dimension === 'device_type') {
                     $query->orWhere('device_type', $this->dimension_value);
                 }
@@ -154,7 +154,7 @@ class AggregatedPerformanceMetric extends Model
         if ($previous->p75_value == 0) {
             return null; // Avoid division by zero
         }
-        
+
         return (($this->p75_value - $previous->p75_value) / $previous->p75_value) * 100;
     }
 }

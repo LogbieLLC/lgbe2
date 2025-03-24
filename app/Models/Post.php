@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
 {
-    use HasFactory, SoftDeletes;
-    
+    use HasFactory;
+    use SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -22,7 +23,7 @@ class Post extends Model
         'community_id',
         'user_id',
     ];
-    
+
     /**
      * Get the user who created the post.
      */
@@ -30,7 +31,7 @@ class Post extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Get the community the post belongs to.
      */
@@ -38,7 +39,7 @@ class Post extends Model
     {
         return $this->belongsTo(Community::class);
     }
-    
+
     /**
      * Get the comments on the post.
      */
@@ -46,7 +47,7 @@ class Post extends Model
     {
         return $this->hasMany(Comment::class);
     }
-    
+
     /**
      * Get the votes on the post.
      */
@@ -54,7 +55,7 @@ class Post extends Model
     {
         return $this->morphMany(Vote::class, 'votable');
     }
-    
+
     /**
      * Calculate the score of the post.
      */
@@ -62,10 +63,10 @@ class Post extends Model
     {
         $upVotes = $this->votes()->where('vote_type', 'up')->count();
         $downVotes = $this->votes()->where('vote_type', 'down')->count();
-        
+
         return $upVotes - $downVotes;
     }
-    
+
     /**
      * Calculate the weighted score of the post based on time decay.
      */
@@ -74,7 +75,7 @@ class Post extends Model
         $score = $this->score;
         $ageInDays = $this->created_at->diffInSeconds(now()) / 86400; // Convert seconds to days
         $decayFactor = 0.1; // Lambda value controlling decay rate
-        
+
         return $score * exp(-$decayFactor * $ageInDays);
     }
 }

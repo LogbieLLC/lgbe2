@@ -50,7 +50,7 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
-    
+
     /**
      * Handle an incoming API authentication request.
      *

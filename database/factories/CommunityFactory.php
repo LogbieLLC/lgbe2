@@ -18,7 +18,7 @@ class CommunityFactory extends Factory
     public function definition(): array
     {
         static $increment = 1;
-        
+
         return [
             'name' => 'Community ' . $increment++,
             'description' => 'Description for community ' . $increment,

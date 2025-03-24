@@ -20,7 +20,7 @@ class CommentFactory extends Factory
     public function definition(): array
     {
         static $increment = 1;
-        
+
         return [
             'content' => 'Comment content ' . $increment++,
             'post_id' => Post::factory(),

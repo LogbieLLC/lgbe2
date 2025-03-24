@@ -10,7 +10,7 @@ uses(RefreshDatabase::class);
 test('authenticated user can comment on a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/posts/{$post->id}/comments", [
             'content' => 'This is a test comment'
@@ -35,13 +35,13 @@ test('authenticated user can comment on a post', function () {
 
 test('unauthenticated user cannot comment on a post', function () {
     $post = Post::factory()->create();
-    
+
     $response = $this->postJson("/api/posts/{$post->id}/comments", [
         'content' => 'This is a test comment'
     ]);
 
     $response->assertStatus(401);
-    
+
     $this->assertDatabaseMissing('comments', [
         'content' => 'This is a test comment',
         'post_id' => $post->id
@@ -56,7 +56,7 @@ test('user can edit their own comment', function () {
         'post_id' => $post->id,
         'content' => 'Original comment'
     ]);
-    
+
     $response = $this->actingAs($user)
         ->putJson("/api/comments/{$comment->id}", [
             'content' => 'Edited comment'
@@ -90,14 +90,14 @@ test('user cannot edit another user\'s comment', function () {
         'post_id' => $post->id,
         'content' => 'Original comment'
     ]);
-    
+
     $response = $this->actingAs($user)
         ->putJson("/api/comments/{$comment->id}", [
             'content' => 'Edited comment'
         ]);
 
     $response->assertStatus(403);
-    
+
     $this->assertDatabaseHas('comments', [
         'id' => $comment->id,
         'content' => 'Original comment'
@@ -107,7 +107,7 @@ test('user cannot edit another user\'s comment', function () {
 test('comment validation rejects empty content', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/posts/{$post->id}/comments", [
             'content' => ''
@@ -120,10 +120,10 @@ test('comment validation rejects empty content', function () {
 test('comment validation rejects too long content', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     // Create a string that's too long (assuming there's a max length validation)
     $longContent = str_repeat('a', 10000);
-    
+
     $response = $this->actingAs($user)
         ->postJson("/api/posts/{$post->id}/comments", [
             'content' => $longContent
@@ -136,14 +136,14 @@ test('comment validation rejects too long content', function () {
 test('nested comments are retrieved with correct structure', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     // Create parent comment
     $parentComment = Comment::factory()->create([
         'user_id' => $user->id,
         'post_id' => $post->id,
         'content' => 'Parent comment'
     ]);
-    
+
     // Create child comments
     $childComment1 = Comment::factory()->create([
         'user_id' => $user->id,
@@ -151,17 +151,17 @@ test('nested comments are retrieved with correct structure', function () {
         'parent_comment_id' => $parentComment->id,
         'content' => 'Child comment 1'
     ]);
-    
+
     $childComment2 = Comment::factory()->create([
         'user_id' => $user->id,
         'post_id' => $post->id,
         'parent_comment_id' => $parentComment->id,
         'content' => 'Child comment 2'
     ]);
-    
+
     // Get comments for the post
     $response = $this->getJson("/api/posts/{$post->id}/comments");
-    
+
     $response->assertStatus(200)
         ->assertJsonCount(1, 'data') // Only parent comments in the root
         ->assertJsonPath('data.0.id', $parentComment->id)

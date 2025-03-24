@@ -14,7 +14,7 @@ test('registration requires all fields', function () {
     ]);
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['username']);
-    
+
     // Test missing email
     $response = $this->postJson('/api/auth/register', [
         'username' => 'testuser',
@@ -23,7 +23,7 @@ test('registration requires all fields', function () {
     ]);
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
-    
+
     // Test missing password
     $response = $this->postJson('/api/auth/register', [
         'username' => 'testuser',
@@ -43,7 +43,7 @@ test('registration validates password requirements', function () {
     ]);
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['password']);
-    
+
     // Test password confirmation mismatch
     $response = $this->postJson('/api/auth/register', [
         'username' => 'testuser',
@@ -60,7 +60,7 @@ test('registration validates unique email', function () {
     User::factory()->create([
         'email' => 'existing@example.com'
     ]);
-    
+
     // Try to register with the same email
     $response = $this->postJson('/api/auth/register', [
         'username' => 'testuser',
@@ -68,7 +68,7 @@ test('registration validates unique email', function () {
         'password' => 'password123',
         'password_confirmation' => 'password123'
     ]);
-    
+
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
 });
@@ -83,7 +83,7 @@ test('registration validates username format', function () {
     ]);
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['username']);
-    
+
     // Test username with invalid characters (if applicable)
     $response = $this->postJson('/api/auth/register', [
         'username' => 'user name',  // Space in username

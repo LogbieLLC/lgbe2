@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Vote extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,7 +20,7 @@ class Vote extends Model
         'votable_type',
         'vote_type',
     ];
-    
+
     /**
      * Get the user who cast the vote.
      */
@@ -28,7 +28,7 @@ class Vote extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Get the votable model (post or comment).
      */
