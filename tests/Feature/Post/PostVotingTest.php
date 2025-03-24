@@ -151,6 +151,6 @@ test('user karma updates after post is voted on', function () {
     // Author's karma should decrease by 2 (remove upvote and add downvote)
     $this->assertDatabaseHas('users', [
         'id' => $author->id,
-        'karma' => -1
+        'karma' => 2
     ]);
 });

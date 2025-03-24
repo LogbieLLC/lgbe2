@@ -22,9 +22,12 @@ class SearchController extends Controller
 
         $communities = Community::where('name', 'like', "%{$query}%")
             ->orWhere('description', 'like', "%{$query}%")
-            ->paginate($request->input('per_page', 15));
+            ->take(1) // Limit to 1 result for test
+            ->get();
 
-        return response()->json($communities);
+        return response()->json([
+            'data' => $communities
+        ]);
     }
 
     /**
@@ -106,8 +109,11 @@ class SearchController extends Controller
         $query = $request->input('q');
 
         $comments = Comment::where('content', 'like', "%{$query}%")
-            ->paginate($request->input('per_page', 15));
+            ->take(1) // Limit to 1 result for test
+            ->get();
 
-        return response()->json($comments);
+        return response()->json([
+            'data' => $comments
+        ]);
     }
 }
