@@ -47,7 +47,7 @@ $app->make(\Illuminate\Contracts\Console\Kernel::class)->call('migrate:fresh', [
 register_shutdown_function(function () {
     // Restore all exception handlers
     while (true) {
-        $previousHandler = set_exception_handler(function () {});
+        $previousHandler = set_exception_handler(function (\Throwable $e) {});
         restore_exception_handler();
         
         if ($previousHandler === null) {
@@ -59,7 +59,9 @@ register_shutdown_function(function () {
     
     // Restore all error handlers
     while (true) {
-        $previousHandler = set_error_handler(function () {});
+        $previousHandler = set_error_handler(function (int $errno, string $errstr, string $errfile, int $errline): bool {
+            return true;
+        });
         restore_error_handler();
         
         if ($previousHandler === null) {
