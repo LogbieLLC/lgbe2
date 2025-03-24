@@ -15,7 +15,7 @@ class CommentController extends Controller
     public function index(Post $post)
     {
         $comments = $post->comments()
-            ->with(['user'])
+            ->with(['user', 'replies.user'])
             ->whereNull('parent_comment_id')
             ->withCount(['votes', 'replies'])
             ->orderByDesc('created_at')
@@ -35,7 +35,7 @@ class CommentController extends Controller
         }
         
         $validated = $request->validate([
-            'content' => 'required|string|max:10000',
+            'content' => 'required|string|max:9999',
             'parent_comment_id' => 'nullable|exists:comments,id',
         ]);
 
