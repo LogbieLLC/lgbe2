@@ -16,8 +16,8 @@ test('make:super-admin command can create a new super admin user', function () {
     ])->assertSuccessful();
 
     // Generate a unique email for testing
-    $email = 'testsuperadmin'.uniqid().'@example.com';
-    
+    $email = 'testsuperadmin' . uniqid() . '@example.com';
+
     // Run the command to create a super admin
     $this->artisan('make:super-admin', [
         '--create' => true,
@@ -26,7 +26,7 @@ test('make:super-admin command can create a new super admin user', function () {
         '--email' => $email,
         '--password' => 'password123'
     ])->assertSuccessful();
-    
+
     // Check that the super admin was created in the database
     $this->assertDatabaseHas('users', [
         'name' => 'Test Super Admin',
@@ -39,7 +39,7 @@ test('make:super-admin command can create a new super admin user', function () {
 test('make:super-admin command can promote existing user to super admin', function () {
     // Create a regular user
     $user = User::factory()->create([
-        'email' => 'regularuser'.uniqid().'@example.com',
+        'email' => 'regularuser' . uniqid() . '@example.com',
         'is_super_admin' => false
     ]);
 
@@ -56,7 +56,7 @@ test('make:super-admin command can promote existing user to super admin', functi
 test('delete:super-admin command can delete a super admin user', function () {
     // Create a super admin user
     $user = User::factory()->create([
-        'email' => 'superadmintodelete'.uniqid().'@example.com',
+        'email' => 'superadmintodelete' . uniqid() . '@example.com',
         'is_super_admin' => true
     ]);
 
@@ -75,7 +75,7 @@ test('delete:super-admin command can delete a super admin user', function () {
 test('delete:super-admin command fails for non-super admin users', function () {
     // Create a regular user
     $user = User::factory()->create([
-        'email' => 'regularuser'.uniqid().'@example.com',
+        'email' => 'regularuser' . uniqid() . '@example.com',
         'is_super_admin' => false
     ]);
 
@@ -93,7 +93,7 @@ test('delete:super-admin command fails for non-super admin users', function () {
 test('super admin users cannot be deleted through web interface', function () {
     // Create a super admin user
     $user = User::factory()->create([
-        'email' => 'superadmin'.uniqid().'@example.com',
+        'email' => 'superadmin' . uniqid() . '@example.com',
         'is_super_admin' => true
     ]);
 
@@ -111,7 +111,7 @@ test('super admin users cannot be deleted through web interface', function () {
 test('middleware prevents modification of super admin status', function () {
     // Create a super admin user
     $user = User::factory()->create([
-        'email' => 'superadmin'.uniqid().'@example.com',
+        'email' => 'superadmin' . uniqid() . '@example.com',
         'is_super_admin' => true
     ]);
 
