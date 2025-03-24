@@ -42,7 +42,7 @@ The sequence is optimized for efficiency and early error detection:
 
 1. **Static Checks First (Steps 1-3)**: Tools like PHP_CodeSniffer, PHPStan, and ESLint run quickly and don't require code execution. They catch code style violations and potential bugs in both PHP and JavaScript, preventing wasted time on tests if basic issues exist.
 
-<!-- End-to-end testing reference removed as part of Dusk removal -->
+2. **Component Testing Next (Steps 4-5)**: Pest and Jest verify the functionality of PHP and JavaScript components, respectively. These tests ensure individual pieces work before testing their integration.
 
 This approach—starting with fast, simple checks and ending with comprehensive tests—helps identify issues early, optimize resources, and maintain a reliable, well-tested codebase.
 
