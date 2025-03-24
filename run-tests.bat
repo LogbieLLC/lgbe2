@@ -80,15 +80,7 @@ if %SPECIFIC_STEP% NEQ 0 (
     for /L %%i in (1,1,%TOTAL_STEPS%) do (
         set CURRENT_STEP=%%i
         
-        if !RUN_ALL! EQU 1 (
-            call :run_step %%i
-        ) else if %%i LEQ 5 (
-            call :run_step %%i
-        ) else (
-            echo.
-            echo %BLUE%Skipping step %%i: !STEP[%%i]! (E2E tests)%RESET%
-            echo %BLUE%To run E2E tests, use --all flag%RESET%
-        )
+        call :run_step %%i
         
         if !ERRORLEVEL! NEQ 0 (
             set ALL_PASSED=0
@@ -115,10 +107,8 @@ echo ========================================
 if !ALL_PASSED! EQU 1 (
     if %SPECIFIC_STEP% NEQ 0 (
         echo %GREEN%Step %SPECIFIC_STEP% (!STEP[%SPECIFIC_STEP%]!) passed successfully.%RESET%
-    ) else if !RUN_ALL! EQU 1 (
-        echo %GREEN%All test steps passed successfully!%RESET%
     ) else (
-        echo %GREEN%All non-E2E test steps passed successfully!%RESET%
+        echo %GREEN%All test steps passed successfully!%RESET%
     )
 ) else (
     echo %RED%The following test steps failed:%RESET%
@@ -152,9 +142,9 @@ echo.
 echo Usage: run-tests.bat [options]
 echo.
 echo Options:
-echo   --all         Run all tests including E2E tests (Dusk)
+echo   --all         Run all tests
 echo   --continue    Continue running tests even if a step fails
-echo   --step N      Run only step N (1-6)
+echo   --step N      Run only step N (1-5)
 echo   --help        Display this help message
 echo.
 echo Test Steps:
