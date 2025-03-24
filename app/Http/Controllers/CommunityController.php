@@ -172,6 +172,27 @@ class CommunityController extends Controller
         return redirect()->route('communities.index')
             ->with('success', 'Community deleted successfully!');
     }
+    
+    /**
+     * Remove a post from a community.
+     */
+    public function removePost(Community $community, \App\Models\Post $post)
+    {
+        // Check if user is a moderator
+        if (!$community->moderators()->where('user_id', Auth::id())->exists()) {
+            return response()->json(['message' => 'Unauthorized action'], 403);
+        }
+
+        // Check if post belongs to the community
+        if ($post->community_id !== $community->id) {
+            return response()->json(['message' => 'Post does not belong to this community'], 404);
+        }
+
+        // Soft delete the post
+        $post->delete();
+
+        return response()->json(['message' => 'Post removed successfully']);
+    }
 
     /**
      * Join a community.
@@ -204,5 +225,31 @@ class CommunityController extends Controller
         }
 
         return response()->json(['message' => 'Not a member of this community'], 409);
+    }
+    
+    /**
+     * Get posts for a community.
+     */
+    public function posts(Community $community)
+    {
+        // Get posts with vote counts
+        $posts = $community->posts()
+            ->with(['user', 'community'])
+            ->withCount(['comments', 'votes'])
+            ->get();
+            
+        // Sort by score (upvotes - downvotes)
+        $sortedPosts = $posts->sortByDesc(function ($post) {
+            $upvotes = $post->votes()->where('vote_type', 'up')->count();
+            $downvotes = $post->votes()->where('vote_type', 'down')->count();
+            return $upvotes - $downvotes;
+        })->values()->take(15);
+            
+        return response()->json([
+            'data' => $sortedPosts,
+            'meta' => [
+                'total' => $posts->count()
+            ]
+        ]);
     }
 }
