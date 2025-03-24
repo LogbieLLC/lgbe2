@@ -43,4 +43,31 @@ $app->make(\Illuminate\Contracts\Console\Kernel::class)->call('migrate:fresh', [
     '--force' => true
 ]);
 
+// Register shutdown function to restore error and exception handlers
+register_shutdown_function(function () {
+    // Restore all exception handlers
+    while (true) {
+        $previousHandler = set_exception_handler(function () {});
+        restore_exception_handler();
+        
+        if ($previousHandler === null) {
+            break;
+        }
+        
+        restore_exception_handler();
+    }
+    
+    // Restore all error handlers
+    while (true) {
+        $previousHandler = set_error_handler(function () {});
+        restore_error_handler();
+        
+        if ($previousHandler === null) {
+            break;
+        }
+        
+        restore_error_handler();
+    }
+});
+
 return $app;

@@ -35,4 +35,50 @@ abstract class TestCase extends BaseTestCase
             });
         }
     }
+
+    /**
+     * Clean up the test environment.
+     */
+    protected function tearDown(): void
+    {
+        // First call parent tearDown to ensure proper cleanup
+        parent::tearDown();
+        
+        // Restore error and exception handlers using Laravel's method
+        $this->flushHandlersState();
+    }
+    
+    /**
+     * Flush the error and exception handlers state.
+     * 
+     * This is based on Laravel's HandleExceptions::flushHandlersState method.
+     *
+     * @return void
+     */
+    protected function flushHandlersState()
+    {
+        // Restore all exception handlers
+        while (true) {
+            $previousHandler = set_exception_handler(function () {});
+            restore_exception_handler();
+            
+            if ($previousHandler === null) {
+                break;
+            }
+            
+            restore_exception_handler();
+        }
+        
+        // Restore all error handlers
+        while (true) {
+            $previousHandler = set_error_handler(function () {});
+            restore_error_handler();
+            
+            if ($previousHandler === null) {
+                break;
+            }
+            
+            restore_error_handler();
+        }
+    }
 }
