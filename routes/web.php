@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\PerformanceDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
