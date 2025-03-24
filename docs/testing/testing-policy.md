@@ -1,6 +1,6 @@
 # Testing Policy
 
-This document outlines our comprehensive testing policy, with a clear separation between UI tests and functional tests. It provides guidelines for when to use each type of test, how to organize them, and best practices for writing effective tests.
+This document outlines our comprehensive testing policy for functional tests. It provides guidelines for when to use each type of test, how to organize them, and best practices for writing effective tests.
 
 ## Table of Contents
 
@@ -11,19 +11,14 @@ This document outlines our comprehensive testing policy, with a clear separation
    - [Integration Tests](#integration-tests)
    - [API Tests](#api-tests)
    - [Best Practices for Functional Tests](#best-practices-for-functional-tests)
-4. [UI Tests](#ui-tests)
-   - [Browser Tests](#browser-tests)
-   - [Component Tests](#component-tests)
-   - [Best Practices for UI Tests](#best-practices-for-ui-tests)
-5. [Test Organization](#test-organization)
-6. [Test Data Management](#test-data-management)
-7. [Test Performance](#test-performance)
-8. [Windows-Specific Considerations](#windows-specific-considerations)
-9. [Continuous Integration](#continuous-integration)
+4. [Test Organization](#test-organization)
+5. [Test Data Management](#test-data-management)
+6. [Test Performance](#test-performance)
+7. [Continuous Integration](#continuous-integration)
 
 ## Introduction
 
-Our testing strategy is designed to ensure high-quality code while maintaining development velocity. We achieve this by implementing a balanced approach to testing that includes both functional tests (testing the application's logic and behavior) and UI tests (testing the user interface and interactions).
+Our testing strategy is designed to ensure high-quality code while maintaining development velocity. We achieve this by implementing a comprehensive approach to testing that focuses on functional tests (testing the application's logic and behavior).
 
 This policy establishes clear guidelines for when to use each type of test, how to organize them, and best practices for writing effective tests.
 
@@ -33,17 +28,17 @@ We follow the testing pyramid approach, which suggests having:
 
 1. **Many unit tests** - Fast, focused tests that verify individual components or functions
 2. **Some integration tests** - Tests that verify how components work together
-3. **Few UI tests** - Slower, more complex tests that verify the entire application
+3. **Few API tests** - Tests that verify the entire application through its API
 
 ```
     /\
    /  \
-  /    \  UI Tests (Browser Tests)
+  /    \  API Tests
  /      \
 /        \
 ----------
 |        |
-|        |  Integration Tests (API Tests)
+|        |  Integration Tests
 |        |
 ----------
 |        |
@@ -159,77 +154,6 @@ test('user can register with valid data', function () {
 7. **Keep tests fast** - Functional tests should be fast to run to encourage frequent testing.
 8. **Use database transactions** - Use database transactions to roll back changes after each test.
 
-## UI Tests
-
-UI tests verify that the application's user interface works as expected. They focus on testing the user interface and interactions from the user's perspective.
-
-We use [Laravel Dusk](https://laravel.com/docs/dusk) with Firefox for our UI tests, which provides a clean API for browser automation.
-
-### Browser Tests
-
-Browser tests verify that the application works correctly in a real browser environment.
-
-**When to use browser tests:**
-- Testing user flows and interactions
-- Testing JavaScript functionality
-- Testing responsive design
-- Testing browser-specific behavior
-
-**Example:**
-
-```php
-test('user can create a post', function () {
-    $user = User::factory()->create();
-    
-    $this->browse(function (Browser $browser) use ($user) {
-        $browser->loginAs($user)
-                ->visit('/communities/1')
-                ->click('@create-post-button')
-                ->type('@post-title', 'Test Post')
-                ->type('@post-content', 'This is a test post')
-                ->click('@submit-post-button')
-                ->assertSee('Test Post')
-                ->assertSee('This is a test post');
-    });
-});
-```
-
-### Component Tests
-
-Component tests verify that individual UI components work as expected.
-
-**When to use component tests:**
-- Testing individual UI components
-- Testing component interactions
-- Testing component states and props
-
-**Example:**
-
-```php
-test('post component displays correctly', function () {
-    $post = Post::factory()->create([
-        'title' => 'Test Post',
-        'content' => 'This is a test post'
-    ]);
-    
-    $this->browse(function (Browser $browser) use ($post) {
-        $browser->visit('/posts/' . $post->id)
-                ->assertSee('Test Post')
-                ->assertSee('This is a test post');
-    });
-});
-```
-
-### Best Practices for UI Tests
-
-1. **Test critical user flows** - Focus on testing the most important user flows.
-2. **Use selectors wisely** - Use data attributes or IDs for selectors instead of CSS classes or XPath.
-3. **Keep tests focused** - Each test should verify a specific user flow or interaction.
-4. **Use page objects** - Use page objects to encapsulate page-specific logic and selectors.
-5. **Handle asynchronous operations** - Use waitFor methods to handle asynchronous operations.
-6. **Take screenshots on failure** - Configure tests to take screenshots on failure for easier debugging.
-7. **Run tests in headless mode** - Run tests in headless mode for faster execution.
-8. **Test across different browsers** - Test across different browsers to ensure cross-browser compatibility.
 
 ## Test Organization
 
@@ -245,11 +169,6 @@ tests/
 ├── Unit/              # Unit tests for individual components
 │   ├── Models/        # Model tests
 │   ├── Services/      # Service tests
-│   └── ...
-├── Browser/           # UI tests using Laravel Dusk
-│   ├── Auth/          # Authentication UI tests
-│   ├── Posts/         # Post UI tests
-│   ├── Comments/      # Comment UI tests
 │   └── ...
 └── ...
 ```
@@ -334,29 +253,14 @@ Keeping tests fast is crucial for maintaining development velocity. We use the f
 4. **Run tests in parallel** - Run tests in parallel to reduce overall execution time.
 5. **Use selective testing** - Run only the tests that are relevant to the changes being made.
 
-## Windows-Specific Considerations
-
-When running tests on Windows, there are some platform-specific differences to be aware of:
-
-1. **TTY Mode**: Windows doesn't support TTY mode, which is used by default in Laravel Dusk. Our Windows batch script automatically adds the `--no-tty` flag to prevent these warnings.
-
-2. **Unix Commands**: Commands like `true` that are commonly used in Unix shell scripts don't exist in Windows. Our batch file uses Windows-specific alternatives and error handling.
-
-3. **Process Management**: Windows uses different commands for process management (`taskkill` instead of `pkill`). The batch script handles this automatically.
-
-4. **Path Separators**: Windows uses backslashes (`\`) for paths while Unix uses forward slashes (`/`). Laravel generally handles this automatically, but it's something to be aware of when writing tests.
 
 ## Continuous Integration
 
-We use GitHub Actions for continuous integration. Our CI pipeline runs both functional and UI tests on every pull request.
+We use GitHub Actions for continuous integration. Our CI pipeline runs functional tests on every pull request.
 
 ### Functional Tests
 
 Functional tests are run on every pull request. They verify that the application's logic and behavior work as expected.
-
-### UI Tests
-
-UI tests are run on every pull request. They verify that the application's user interface works as expected.
 
 ### Code Coverage
 
@@ -364,6 +268,6 @@ We track code coverage to ensure that our tests cover a significant portion of t
 
 ## Conclusion
 
-This testing policy provides guidelines for writing effective tests that verify both the application's logic and user interface. By following these guidelines, we can ensure that our application is well-tested and maintainable.
+This testing policy provides guidelines for writing effective tests that verify the application's logic and behavior. By following these guidelines, we can ensure that our application is well-tested and maintainable.
 
 Remember, the goal of testing is not to achieve 100% code coverage, but to ensure that the application works as expected and to catch regressions early.

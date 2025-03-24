@@ -4,4 +4,4 @@ This directory contains documentation related to testing practices, policies, an
 
 ## Contents
 
-- [Testing Policy](testing-policy.md) - Our comprehensive testing policy that separates UI and functional tests
+- [Testing Policy](testing-policy.md) - Our comprehensive testing policy for functional tests
