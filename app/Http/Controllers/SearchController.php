@@ -19,14 +19,14 @@ class SearchController extends Controller
     public function searchCommunities(Request $request)
     {
         $query = $request->input('q');
-        
+
         $communities = Community::where('name', 'like', "%{$query}%")
             ->orWhere('description', 'like', "%{$query}%")
             ->paginate($request->input('per_page', 15));
-        
+
         return response()->json($communities);
     }
-    
+
     /**
      * Search for posts by title or content.
      *
@@ -41,32 +41,32 @@ class SearchController extends Controller
         $to = $request->input('to');
         $sort = $request->input('sort', 'created_at');
         $order = $request->input('order', 'desc');
-        
-        $posts = Post::where(function($q) use ($query) {
+
+        $posts = Post::where(function ($q) use ($query) {
                 $q->where('title', 'like', "%{$query}%")
                   ->orWhere('content', 'like', "%{$query}%");
-            });
-        
+        });
+
         // Filter by community if specified
         if ($communityId) {
             $posts->where('community_id', $communityId);
         }
-        
+
         // Filter by date range if specified
         if ($from) {
             $posts->whereDate('created_at', '>=', $from);
         }
-        
+
         if ($to) {
             $posts->whereDate('created_at', '<=', $to);
         }
-        
+
         // Sort results
         $posts->orderBy($sort, $order);
-        
+
         // Get paginated results
         $paginated = $posts->paginate($request->input('per_page', 15));
-        
+
         // Format the dates for the test
         $formattedData = collect($paginated->items())->map(function ($post) {
             // Convert the created_at to the format expected by the test
@@ -76,7 +76,7 @@ class SearchController extends Controller
             }
             return $post;
         });
-        
+
         // Return the response with the expected structure
         return response()->json([
             'data' => $formattedData,
@@ -94,7 +94,7 @@ class SearchController extends Controller
             ],
         ]);
     }
-    
+
     /**
      * Search for comments by content.
      *
@@ -104,10 +104,10 @@ class SearchController extends Controller
     public function searchComments(Request $request)
     {
         $query = $request->input('q');
-        
+
         $comments = Comment::where('content', 'like', "%{$query}%")
             ->paginate($request->input('per_page', 15));
-        
+
         return response()->json($comments);
     }
 }

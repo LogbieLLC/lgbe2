@@ -8,13 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
-
 use PHPUnit\Framework\Attributes\Test;
+
 class EmailVerificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_email_verification_screen_can_be_rendered()
+    #[Test]
+    public function testEmailVerificationScreenCanBeRendered()
     {
         $user = User::factory()->unverified()->create();
 
@@ -23,7 +24,8 @@ class EmailVerificationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_email_can_be_verified()
+    #[Test]
+    public function testEmailCanBeVerified()
     {
         $user = User::factory()->unverified()->create();
 
@@ -39,10 +41,11 @@ class EmailVerificationTest extends TestCase
 
         Event::assertDispatched(Verified::class);
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
-        $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+        $response->assertRedirect(route('dashboard', absolute: false) . '?verified=1');
     }
 
-    public function test_email_is_not_verified_with_invalid_hash()
+    #[Test]
+    public function testEmailIsNotVerifiedWithInvalidHash()
     {
         $user = User::factory()->unverified()->create();
 

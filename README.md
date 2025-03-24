@@ -32,54 +32,7 @@ The application includes feature tests for various components:
 php artisan test
 ```
 
-### End-to-End Tests
-
-End-to-end tests are implemented using Laravel Dusk to verify core application functionality:
-
-- Home page tests
-- User registration tests
-- Post management tests
-- Post voting tests
-- Comment system tests
-
-#### Prerequisites for End-to-End Tests
-
-Before running the end-to-end tests, ensure you have:
-
-1. Google Chrome installed on your system
-2. Laravel Dusk installed:
-   ```bash
-   composer require --dev laravel/dusk
-   php artisan dusk:install
-   ```
-3. Chrome WebDriver installed:
-   ```bash
-   php artisan dusk:chrome-driver
-   ```
-
-You may need to configure the Chrome binary path in `tests/DuskTestCase.php` if Chrome is not found automatically.
-
-#### Running End-to-End Tests
-
-On Windows:
-
-```bash
-run-dusk-tests.bat
-```
-
-On macOS/Linux:
-
-```bash
-./run-dusk-tests.sh
-```
-
-Or manually:
-
-```bash
-php artisan dusk
-```
-
-For more information about the end-to-end tests, see [tests/Browser/README.md](tests/Browser/README.md).
+<!-- End-to-end testing section removed -->
 
 ## Development
 

@@ -5,13 +5,14 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-
 use PHPUnit\Framework\Attributes\Test;
+
 class PasswordConfirmationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_confirm_password_screen_can_be_rendered()
+    #[Test]
+    public function testConfirmPasswordScreenCanBeRendered()
     {
         $user = User::factory()->create();
 
@@ -20,7 +21,8 @@ class PasswordConfirmationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_password_can_be_confirmed()
+    #[Test]
+    public function testPasswordCanBeConfirmed()
     {
         $user = User::factory()->create();
 
@@ -32,7 +34,8 @@ class PasswordConfirmationTest extends TestCase
         $response->assertSessionHasNoErrors();
     }
 
-    public function test_password_is_not_confirmed_with_invalid_password()
+    #[Test]
+    public function testPasswordIsNotConfirmedWithInvalidPassword()
     {
         $user = User::factory()->create();
 

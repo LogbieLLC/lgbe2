@@ -35,16 +35,16 @@ class MakeSuperAdmin extends Command
     {
         if ($this->option('create')) {
             $this->createSuperAdmin();
-        } else if ($this->option('email')) {
+        } elseif ($this->option('email')) {
             $this->promoteSuperAdmin();
         } else {
             $this->error('Please specify either --create to create a new super admin or --email to promote an existing user.');
             return 1;
         }
-        
+
         return 0;
     }
-    
+
     /**
      * Create a new user with super admin status.
      */
@@ -54,24 +54,24 @@ class MakeSuperAdmin extends Command
         $username = $this->option('username');
         $email = $this->option('email');
         $password = $this->option('password');
-        
+
         // Prompt for any missing information
         if (!$name) {
             $name = $this->ask('Enter the name for the super admin');
         }
-        
+
         if (!$username) {
             $username = $this->ask('Enter the username for the super admin');
         }
-        
+
         if (!$email) {
             $email = $this->ask('Enter the email for the super admin');
         }
-        
+
         if (!$password) {
             $password = $this->secret('Enter the password for the super admin');
         }
-        
+
         // Validate input
         $validator = Validator::make([
             'name' => $name,
@@ -84,14 +84,14 @@ class MakeSuperAdmin extends Command
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
         ]);
-        
+
         if ($validator->fails()) {
             foreach ($validator->errors()->all() as $error) {
                 $this->error($error);
             }
             return;
         }
-        
+
         // Create the super admin
         $superAdmin = User::create([
             'name' => $name,
@@ -101,32 +101,32 @@ class MakeSuperAdmin extends Command
             'karma' => 0,
             'is_super_admin' => true,
         ]);
-        
+
         $this->info("Super admin created: {$superAdmin->name} ({$superAdmin->email})");
     }
-    
+
     /**
      * Promote an existing user to super admin.
      */
     private function promoteSuperAdmin()
     {
         $email = $this->option('email');
-        
+
         $user = User::where('email', $email)->first();
-        
+
         if (!$user) {
             $this->error("No user found with email: {$email}");
             return;
         }
-        
+
         if ($user->is_super_admin) {
             $this->info("User {$user->name} is already a super admin.");
             return;
         }
-        
+
         $user->is_super_admin = true;
         $user->save();
-        
+
         $this->info("User {$user->name} ({$user->email}) has been promoted to super admin.");
     }
 }

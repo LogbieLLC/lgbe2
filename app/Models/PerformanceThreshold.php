@@ -62,7 +62,7 @@ class PerformanceThreshold extends Model
     public static function getMostSpecificThreshold($metricName, $urlPath = null, $deviceType = null)
     {
         $query = self::where('metric_name', $metricName);
-        
+
         // Order by specificity - most specific first
         $query->orderByRaw('
             CASE 
@@ -72,7 +72,7 @@ class PerformanceThreshold extends Model
                 ELSE 4
             END
         ');
-        
+
         // Filter by URL pattern if provided
         if ($urlPath) {
             $query->where(function ($q) use ($urlPath) {
@@ -80,7 +80,7 @@ class PerformanceThreshold extends Model
                   ->orWhereRaw("? LIKE url_pattern", [$urlPath]);
             });
         }
-        
+
         // Filter by device type if provided
         if ($deviceType) {
             $query->where(function ($q) use ($deviceType) {
@@ -88,7 +88,7 @@ class PerformanceThreshold extends Model
                   ->orWhere('device_type', $deviceType);
             });
         }
-        
+
         return $query->first();
     }
 

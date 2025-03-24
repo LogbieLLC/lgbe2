@@ -5,13 +5,14 @@ namespace Tests\Feature\Settings;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-
 use PHPUnit\Framework\Attributes\Test;
+
 class ProfileUpdateTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed()
+    #[Test]
+    public function testProfilePageIsDisplayed()
     {
         $user = User::factory()->create();
 
@@ -22,7 +23,8 @@ class ProfileUpdateTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_profile_information_can_be_updated()
+    #[Test]
+    public function testProfileInformationCanBeUpdated()
     {
         $user = User::factory()->create();
 
@@ -44,7 +46,8 @@ class ProfileUpdateTest extends TestCase
         $this->assertNull($user->email_verified_at);
     }
 
-    public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged()
+    #[Test]
+    public function testEmailVerificationStatusIsUnchangedWhenTheEmailAddressIsUnchanged()
     {
         $user = User::factory()->create();
 
@@ -62,7 +65,8 @@ class ProfileUpdateTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_delete_their_account()
+    #[Test]
+    public function testUserCanDeleteTheirAccount()
     {
         $user = User::factory()->create();
 
@@ -80,7 +84,8 @@ class ProfileUpdateTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
-    public function test_correct_password_must_be_provided_to_delete_account()
+    #[Test]
+    public function testCorrectPasswordMustBeProvidedToDeleteAccount()
     {
         $user = User::factory()->create();
 

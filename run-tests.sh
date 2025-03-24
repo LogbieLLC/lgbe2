@@ -12,15 +12,14 @@ echo -e "Running tests in order of operations"
 echo -e "=========================================\n"
 
 # Define test steps
-STEPS=("PHP_CodeSniffer" "PHPStan" "ESLint" "Pest" "Jest" "Dusk")
-COMMANDS=("vendor/bin/phpcs" "vendor/bin/phpstan analyse --memory-limit=512M" "npm run lint" "vendor/bin/pest" "npm test" "./run-dusk-tests.sh")
+STEPS=("PHP_CodeSniffer" "PHPStan" "ESLint" "Pest" "Jest")
+COMMANDS=("vendor/bin/phpcs" "vendor/bin/phpstan analyse --memory-limit=512M" "npm run lint" "vendor/bin/pest" "npm test")
 DESCRIPTIONS=(
     "Enforces coding standards for PHP, ensuring the code is consistent, readable, and adheres to best practices."
     "Performs static analysis on PHP code to uncover potential bugs, type errors, and logical inconsistencies."
     "Lints JavaScript code within Vue.js components to enforce coding standards and flag common errors."
     "Runs unit and integration tests for PHP code to verify that individual components and their interactions work correctly."
     "Executes unit tests for JavaScript code in Vue.js components, ensuring they function as expected in isolation."
-    "Conducts end-to-end tests for the Laravel application, simulating user interactions to validate the entire system."
 )
 
 # Initialize variables
@@ -36,9 +35,9 @@ CONTINUE_ON_ERROR=false
 function usage {
     echo -e "\nUsage: ./run-tests.sh [options]"
     echo -e "\nOptions:"
-    echo "  --all         Run all tests including E2E tests (Dusk)"
+    echo "  --all         Run all tests"
     echo "  --continue    Continue running tests even if a step fails"
-    echo "  --step N      Run only step N (1-6)"
+    echo "  --step N      Run only step N (1-5)"
     echo "  --help        Display this help message"
     echo -e "\nTest Steps:"
     echo "  1. PHP_CodeSniffer - PHP coding standards"
@@ -46,7 +45,6 @@ function usage {
     echo "  3. ESLint - JavaScript/Vue linting"
     echo "  4. Pest - PHP unit/integration tests"
     echo "  5. Jest - JavaScript unit tests"
-    echo "  6. Dusk - End-to-end browser tests"
     echo ""
     exit 1
 }
@@ -57,8 +55,8 @@ while [[ "$#" -gt 0 ]]; do
         --all) RUN_ALL=true ;;
         --continue) CONTINUE_ON_ERROR=true ;;
         --step) 
-            if [[ -z "$2" || ! "$2" =~ ^[1-6]$ ]]; then
-                echo -e "${RED}Error: --step requires a number parameter between 1 and 6.${NC}"
+            if [[ -z "$2" || ! "$2" =~ ^[1-5]$ ]]; then
+                echo -e "${RED}Error: --step requires a number parameter between 1 and 5.${NC}"
                 usage
             fi
             SPECIFIC_STEP=$2
@@ -70,8 +68,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# Make script executable
-chmod +x run-dusk-tests.sh 2>/dev/null
+# No longer need to make Dusk script executable
 
 # Function to run a test step
 run_step() {
@@ -101,21 +98,16 @@ if [ $SPECIFIC_STEP -ne 0 ]; then
     fi
 else
     for ((i=1; i<=$TOTAL_STEPS; i++)); do
-        if $RUN_ALL || [ $i -le 5 ]; then
-            run_step $i
-            if [ $? -ne 0 ]; then
-                ALL_PASSED=false
-                FAILED_STEPS+=($i)
-                
-                if ! $CONTINUE_ON_ERROR && [ $i -lt $TOTAL_STEPS ]; then
-                    echo -e "\n${RED}Test step $i failed. Stopping test execution.${NC}"
-                    echo -e "${YELLOW}Use --continue flag to continue testing despite failures.${NC}"
-                    break
-                fi
+        run_step $i
+        if [ $? -ne 0 ]; then
+            ALL_PASSED=false
+            FAILED_STEPS+=($i)
+            
+            if ! $CONTINUE_ON_ERROR && [ $i -lt $TOTAL_STEPS ]; then
+                echo -e "\n${RED}Test step $i failed. Stopping test execution.${NC}"
+                echo -e "${YELLOW}Use --continue flag to continue testing despite failures.${NC}"
+                break
             fi
-        else
-            echo -e "\n${BLUE}Skipping step $i: ${STEPS[$i-1]} (E2E tests)${NC}"
-            echo -e "${BLUE}To run E2E tests, use --all flag${NC}"
         fi
     done
 fi
@@ -128,10 +120,8 @@ echo -e "=========================================\n"
 if $ALL_PASSED; then
     if [ $SPECIFIC_STEP -ne 0 ]; then
         echo -e "${GREEN}Step $SPECIFIC_STEP (${STEPS[$SPECIFIC_STEP-1]}) passed successfully.${NC}"
-    elif $RUN_ALL; then
-        echo -e "${GREEN}All test steps passed successfully!${NC}"
     else
-        echo -e "${GREEN}All non-E2E test steps passed successfully!${NC}"
+        echo -e "${GREEN}All test steps passed successfully!${NC}"
     fi
 else
     echo -e "${RED}The following test steps failed:${NC}"

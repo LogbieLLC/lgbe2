@@ -41,7 +41,7 @@ class CommunityPolicy
         if ($community->created_by === $user->id) {
             return true;
         }
-        
+
         return $community->moderators()->where('user_id', $user->id)->exists();
     }
 
@@ -71,7 +71,7 @@ class CommunityPolicy
         // Only the creator can permanently delete a community
         return $community->created_by === $user->id;
     }
-    
+
     /**
      * Determine whether the user can moderate the community.
      */
@@ -81,7 +81,7 @@ class CommunityPolicy
         if ($community->created_by === $user->id) {
             return true;
         }
-        
+
         return $community->moderators()->where('user_id', $user->id)->exists();
     }
 }

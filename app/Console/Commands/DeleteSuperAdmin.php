@@ -27,27 +27,27 @@ class DeleteSuperAdmin extends Command
     public function handle()
     {
         $email = $this->argument('email');
-        
+
         $user = User::where('email', $email)->first();
-        
+
         if (!$user) {
             $this->error("No user found with email: {$email}");
             return 1;
         }
-        
+
         if (!$user->is_super_admin) {
             $this->error("User {$user->name} is not a super admin.");
             return 1;
         }
-        
+
         // Confirm deletion
         if (!$this->confirm("Are you sure you want to delete super admin {$user->name} ({$user->email})?")) {
             $this->info('Operation cancelled.');
             return 0;
         }
-        
+
         $user->delete();
-        
+
         $this->info("Super admin {$user->name} ({$user->email}) has been deleted.");
         return 0;
     }

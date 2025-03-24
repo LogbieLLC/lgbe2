@@ -10,8 +10,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -54,7 +55,7 @@ class User extends Authenticatable
             'locked_at' => 'datetime',
         ];
     }
-    
+
     /**
      * Get the communities created by the user.
      */
@@ -62,7 +63,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Community::class, 'created_by');
     }
-    
+
     /**
      * Get the communities the user is a member of.
      */
@@ -73,7 +74,7 @@ class User extends Authenticatable
             ->withPivot('role')
             ->withTimestamps();
     }
-    
+
     /**
      * Get the communities the user moderates.
      */
@@ -84,7 +85,7 @@ class User extends Authenticatable
             ->wherePivot('role', 'moderator')
             ->withTimestamps();
     }
-    
+
     /**
      * Get the posts created by the user.
      */
@@ -92,7 +93,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class);
     }
-    
+
     /**
      * Get the comments created by the user.
      */
@@ -100,7 +101,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
-    
+
     /**
      * Get the votes cast by the user.
      */
@@ -108,7 +109,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Vote::class);
     }
-    
+
     /**
      * Get the bans issued by the user.
      */
@@ -116,7 +117,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Ban::class, 'banned_by');
     }
-    
+
     /**
      * Get the bans received by the user.
      */
@@ -124,7 +125,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Ban::class);
     }
-    
+
     /**
      * Check if the user is a super admin.
      */

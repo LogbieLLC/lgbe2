@@ -50,12 +50,12 @@ class CommentPolicy
         if ($comment->user_id === $user->id) {
             return true;
         }
-        
+
         // Or post author
         if ($comment->post->user_id === $user->id) {
             return true;
         }
-        
+
         // Or community moderators
         return $comment->post->community->moderators()->where('user_id', $user->id)->exists();
     }
@@ -69,7 +69,7 @@ class CommentPolicy
         if ($comment->user_id === $user->id) {
             return true;
         }
-        
+
         // Or community moderators
         return $comment->post->community->moderators()->where('user_id', $user->id)->exists();
     }

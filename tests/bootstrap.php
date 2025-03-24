@@ -25,4 +25,22 @@ Container::setInstance($app);
 // Set the facade application
 Facade::setFacadeApplication($app);
 
+// Create SQLite database file if needed
+$databasePath = dirname(__DIR__) . '/database/database.sqlite';
+$databaseDir = dirname($databasePath);
+
+if (!file_exists($databaseDir)) {
+    mkdir($databaseDir, 0777, true);
+}
+
+if (!file_exists($databasePath)) {
+    touch($databasePath);
+}
+
+// Run migrations for testing
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->call('migrate:fresh', [
+    '--seed' => true,
+    '--force' => true
+]);
+
 return $app;

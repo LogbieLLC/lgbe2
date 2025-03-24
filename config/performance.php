@@ -16,25 +16,25 @@ return [
         'dev-team@example.com',
         'engineering-manager@example.com',
     ],
-    
+
     'business_report_recipients' => [
         'product-manager@example.com',
         'marketing@example.com',
         'ceo@example.com',
     ],
-    
+
     'alert_recipients' => [
         'on-call@example.com',
         'devops@example.com',
     ],
-    
+
     // Integration settings
     'google_analytics' => [
         'enabled' => env('PERFORMANCE_GA_ENABLED', false),
         'view_id' => env('PERFORMANCE_GA_VIEW_ID'),
         'service_account_path' => storage_path('app/google/service-account.json'),
     ],
-    
+
     // Alert thresholds
     'regression_thresholds' => [
         'lcp' => 20, // 20% change to trigger alert
@@ -42,7 +42,7 @@ return [
         'inp' => 20,
         'onload_time' => 25,
     ],
-    
+
     // Performance thresholds
     'performance_targets' => [
         'lcp' => [
@@ -62,13 +62,13 @@ return [
             'poor' => 6000, // ms
         ],
     ],
-    
+
     // Notification channels
     'slack_webhook' => env('PERFORMANCE_SLACK_WEBHOOK'),
-    
+
     // Sampling rate (percentage of page loads to measure)
     'sampling_rate' => env('PERFORMANCE_SAMPLING_RATE', 10), // 10%
-    
+
     // Data retention (in days)
     'retention' => [
         'raw_metrics' => 30,
@@ -77,7 +77,7 @@ return [
         'weekly_aggregations' => 365,
         'monthly_aggregations' => 1095, // 3 years
     ],
-    
+
     // Dashboard access
     'dashboard_access' => [
         'roles' => ['admin', 'developer'],

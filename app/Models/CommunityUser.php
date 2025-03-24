@@ -16,7 +16,7 @@ class CommunityUser extends Pivot
         'community_id',
         'role',
     ];
-    
+
     /**
      * Get the user that belongs to the community.
      */
@@ -24,7 +24,7 @@ class CommunityUser extends Pivot
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Get the community that the user belongs to.
      */

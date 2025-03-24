@@ -11,7 +11,6 @@ parameters:
         - vendor
         - storage
         - bootstrap/cache
-        - tests/Browser
     
     # Laravel specific settings
     treatPhpDocTypesAsCertain: false

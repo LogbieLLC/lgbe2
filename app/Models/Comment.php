@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Comment extends Model
 {
-    use HasFactory, SoftDeletes;
-    
+    use HasFactory;
+    use SoftDeletes;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,7 +22,7 @@ class Comment extends Model
         'user_id',
         'parent_comment_id',
     ];
-    
+
     /**
      * Get the user who created the comment.
      */
@@ -29,7 +30,7 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Get the post the comment belongs to.
      */
@@ -37,7 +38,7 @@ class Comment extends Model
     {
         return $this->belongsTo(Post::class);
     }
-    
+
     /**
      * Get the parent comment.
      */
@@ -45,7 +46,7 @@ class Comment extends Model
     {
         return $this->belongsTo(Comment::class, 'parent_comment_id');
     }
-    
+
     /**
      * Get the replies to the comment.
      */
@@ -53,7 +54,7 @@ class Comment extends Model
     {
         return $this->hasMany(Comment::class, 'parent_comment_id');
     }
-    
+
     /**
      * Get the votes on the comment.
      */
@@ -61,7 +62,7 @@ class Comment extends Model
     {
         return $this->morphMany(Vote::class, 'votable');
     }
-    
+
     /**
      * Calculate the score of the comment.
      */
@@ -69,7 +70,7 @@ class Comment extends Model
     {
         $upVotes = $this->votes()->where('vote_type', 'up')->count();
         $downVotes = $this->votes()->where('vote_type', 'down')->count();
-        
+
         return $upVotes - $downVotes;
     }
 }

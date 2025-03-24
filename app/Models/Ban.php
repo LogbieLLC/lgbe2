@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Ban extends Model
 {
     use HasFactory;
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -21,7 +21,7 @@ class Ban extends Model
         'reason',
         'expires_at',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -30,7 +30,7 @@ class Ban extends Model
     protected $casts = [
         'expires_at' => 'datetime',
     ];
-    
+
     /**
      * Get the user who is banned.
      */
@@ -38,7 +38,7 @@ class Ban extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Get the community the user is banned from.
      */
@@ -46,7 +46,7 @@ class Ban extends Model
     {
         return $this->belongsTo(Community::class);
     }
-    
+
     /**
      * Get the moderator who issued the ban.
      */
@@ -54,7 +54,7 @@ class Ban extends Model
     {
         return $this->belongsTo(User::class, 'banned_by');
     }
-    
+
     /**
      * Determine if the ban is active.
      */

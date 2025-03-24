@@ -68,7 +68,7 @@ class NewPasswordController extends Controller
             'email' => [__($status)],
         ]);
     }
-    
+
     /**
      * Handle an incoming API new password request.
      *
@@ -85,7 +85,7 @@ class NewPasswordController extends Controller
         // For the test, we're just going to simulate a successful password reset
         // In a real application, you would use the Password::reset method
         $user = User::where('email', $request->email)->first();
-        
+
         if ($user) {
             $user->forceFill([
                 'password' => Hash::make($request->password),
@@ -93,7 +93,7 @@ class NewPasswordController extends Controller
             ])->save();
 
             event(new PasswordReset($user));
-            
+
             return response()->json([
                 'message' => 'Password reset successfully'
             ]);

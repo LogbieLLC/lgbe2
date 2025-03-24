@@ -33,7 +33,7 @@ class UserController extends Controller
             ->sum(function ($post) {
                 return $post->upvotes_count - $post->downvotes_count;
             });
-        
+
         // Calculate karma from comment votes
         $commentKarma = Comment::where('user_id', $user->id)
             ->withCount(['votes as upvotes_count' => function ($query) {
@@ -46,19 +46,19 @@ class UserController extends Controller
             ->sum(function ($comment) {
                 return $comment->upvotes_count - $comment->downvotes_count;
             });
-        
+
         // Add karma to user data
         $userData = $user->toArray();
         $userData['karma'] = $postKarma + $commentKarma;
-        
+
         // If username is not set, use name as a fallback
         if (empty($userData['username'])) {
             $userData['username'] = $userData['name'];
         }
-        
+
         return response()->json($userData);
     }
-    
+
     /**
      * Update the specified user.
      *
@@ -72,28 +72,28 @@ class UserController extends Controller
         if (Auth::id() !== $user->id) {
             return response()->json(['message' => 'Unauthorized action'], 403);
         }
-        
+
         $validated = $request->validate([
             'username' => ['sometimes', 'string', 'max:255', Rule::unique('users')->ignore($user->id)],
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
         ]);
-        
+
         // Hash password if it's being updated
         if (isset($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         }
-        
+
         // Sync name and username fields
         if (isset($validated['username'])) {
             $validated['name'] = $validated['username'];
         }
-        
+
         $user->update($validated);
-        
+
         return response()->json(['message' => 'Profile updated successfully']);
     }
-    
+
     /**
      * Get the user's posts.
      *
@@ -110,10 +110,10 @@ class UserController extends Controller
                 $query->where('vote_type', 'down');
             }])
             ->paginate(15);
-        
+
         return response()->json($posts);
     }
-    
+
     /**
      * Get the user's comments.
      *
@@ -130,7 +130,7 @@ class UserController extends Controller
                 $query->where('vote_type', 'down');
             }])
             ->paginate(15);
-        
+
         return response()->json($comments);
     }
 }
