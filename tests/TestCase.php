@@ -19,11 +19,11 @@ abstract class TestCase extends BaseTestCase
         // Create SQLite database file if it doesn't exist
         $databasePath = database_path('database.sqlite');
         $databaseDir = dirname($databasePath);
-        
+
         if (!file_exists($databaseDir)) {
             mkdir($databaseDir, 0777, true);
         }
-        
+
         if (!file_exists($databasePath)) {
             touch($databasePath);
         }
