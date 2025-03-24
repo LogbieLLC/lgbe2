@@ -25,4 +25,7 @@ Container::setInstance($app);
 // Set the facade application
 Facade::setFacadeApplication($app);
 
+// Run migrations for testing
+$app->make(\Illuminate\Contracts\Console\Kernel::class)->call('migrate:fresh');
+
 return $app;
