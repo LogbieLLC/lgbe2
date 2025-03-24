@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\PerformanceDashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,6 +43,22 @@ Route::get('/communities', [CommunityController::class, 'index'])->name('communi
 Route::get('/communities/create', [CommunityController::class, 'create'])->middleware(['auth'])->name('communities.create');
 Route::post('/communities', [CommunityController::class, 'store'])->middleware(['auth'])->name('communities.store');
 Route::get('/communities/{community:slug}', [CommunityController::class, 'show'])->name('communities.show');
+
+// Settings routes
+Route::middleware(['auth'])->group(function () {
+    // Regular settings routes
+    Route::get('/settings/profile', [SettingsController::class, 'showProfile'])->name('settings.profile');
+    Route::get('/settings/password', [SettingsController::class, 'showPassword'])->name('settings.password');
+    
+    // Protected routes that need additional middleware for super admins
+    Route::middleware(['protect.superadmin'])->group(function () {
+        Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+        Route::post('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.post');
+        Route::delete('/settings/profile', [SettingsController::class, 'destroy'])->name('settings.profile.destroy');
+        Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+        Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.post');
+    });
+});
 
 // Performance dashboard routes
 Route::middleware(['auth', 'performance.dashboard'])->prefix('performance')->group(function () {

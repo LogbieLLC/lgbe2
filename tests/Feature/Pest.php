@@ -10,7 +10,7 @@ uses(TestCase::class, RefreshDatabase::class)
         // Restore error handlers that might be removed by test code
         set_error_handler(null);
         set_exception_handler(null);
-        
+
         // Ensure database connection is properly set up
         DB::purge();
         DB::reconnect();

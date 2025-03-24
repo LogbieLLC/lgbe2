@@ -4,9 +4,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 test('user can register with valid data', function () {
+    $uniqueEmail = 'test' . uniqid() . '@example.com';
     $response = $this->postJson('/api/auth/register', [
         'username' => 'testuser',
-        'email' => 'test@example.com',
+        'email' => $uniqueEmail,
         'password' => 'password123',
         'password_confirmation' => 'password123'
     ]);
@@ -24,7 +25,7 @@ test('user can register with valid data', function () {
 
     $this->assertDatabaseHas('users', [
         'name' => 'testuser',
-        'email' => 'test@example.com'
+        'email' => $uniqueEmail
     ]);
 });
 
@@ -41,13 +42,14 @@ test('user cannot register with invalid data', function () {
 });
 
 test('user can login with valid credentials', function () {
+    $uniqueEmail = 'test' . uniqid() . '@example.com';
     $user = User::factory()->create([
-        'email' => 'test@example.com',
+        'email' => $uniqueEmail,
         'password' => Hash::make('password123')
     ]);
 
     $response = $this->postJson('/api/auth/login', [
-        'email' => 'test@example.com',
+        'email' => $uniqueEmail,
         'password' => 'password123'
     ]);
 
@@ -64,8 +66,14 @@ test('user can login with valid credentials', function () {
 });
 
 test('user cannot login with invalid credentials', function () {
+    $uniqueEmail = 'test' . uniqid() . '@example.com';
+    $user = User::factory()->create([
+        'email' => $uniqueEmail,
+        'password' => Hash::make('password123')
+    ]);
+    
     $response = $this->postJson('/api/auth/login', [
-        'email' => 'test@example.com',
+        'email' => $uniqueEmail,
         'password' => 'wrongpassword'
     ]);
 
@@ -74,12 +82,13 @@ test('user cannot login with invalid credentials', function () {
 });
 
 test('user can request password reset', function () {
+    $uniqueEmail = 'test' . uniqid() . '@example.com';
     $user = User::factory()->create([
-        'email' => 'test@example.com'
+        'email' => $uniqueEmail
     ]);
 
     $response = $this->postJson('/api/auth/forgot-password', [
-        'email' => 'test@example.com'
+        'email' => $uniqueEmail
     ]);
 
     $response->assertStatus(200)
@@ -87,17 +96,18 @@ test('user can request password reset', function () {
 });
 
 test('user can reset password with valid token', function () {
+    $uniqueEmail = 'test' . uniqid() . '@example.com';
     $user = User::factory()->create([
-        'email' => 'test@example.com'
+        'email' => $uniqueEmail
     ]);
 
     $token = $this->postJson('/api/auth/forgot-password', [
-        'email' => 'test@example.com'
+        'email' => $uniqueEmail
     ]);
 
     $response = $this->postJson('/api/auth/reset-password', [
         'token' => $token,
-        'email' => 'test@example.com',
+        'email' => $uniqueEmail,
         'password' => 'newpassword123',
         'password_confirmation' => 'newpassword123'
     ]);
