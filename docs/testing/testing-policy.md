@@ -229,7 +229,7 @@ We use seeders to populate the database with test data for UI tests. Seeders pro
 **Example:**
 
 ```php
-// DuskTestSeeder.php
+// TestSeeder.php
 public function run()
 {
     // Create users
