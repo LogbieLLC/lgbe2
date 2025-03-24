@@ -19,10 +19,8 @@ abstract class TestCase extends BaseTestCase
         // Mock Vite to prevent ViteManifestNotFoundException
         $this->withoutVite();
 
-        // Run migrations for in-memory database
-        if (config('database.default') === 'sqlite' && config('database.connections.sqlite.database') === ':memory:') {
-            $this->artisan('migrate:fresh');
-        }
+        // For in-memory database, we don't need to run migrations here
+        // RefreshDatabase trait will handle this properly
         
         // Create SQLite database file if using file-based SQLite
         if (config('database.default') === 'sqlite' && config('database.connections.sqlite.database') !== ':memory:') {

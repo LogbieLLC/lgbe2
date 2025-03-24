@@ -38,7 +38,7 @@ class SettingsController extends Controller
             return response()->json(['message' => 'Profile updated successfully']);
         }
 
-        return back()->with('success', 'Profile updated successfully');
+        return redirect('/settings/profile')->with('success', 'Profile updated successfully');
     }
     
     /**
