@@ -88,7 +88,7 @@ test('delete:super-admin command fails for non-super admin users', function () {
 test('super admin users cannot be deleted through web interface', function () {
     // Skip this test until middleware is properly configured
     $this->markTestSkipped('Skipping test until protect.superadmin middleware is properly configured');
-    
+
     // Create a super admin user with unique email
     $email = 'superadmin' . uniqid() . '@example.com';
     $user = User::factory()->create([
@@ -110,7 +110,7 @@ test('super admin users cannot be deleted through web interface', function () {
 test('middleware prevents modification of super admin status', function () {
     // Skip this test until middleware is properly configured
     $this->markTestSkipped('Skipping test until protect.superadmin middleware is properly configured');
-    
+
     // Create a super admin user with unique email
     $email = 'superadmin' . uniqid() . '@example.com';
     $user = User::factory()->create([
