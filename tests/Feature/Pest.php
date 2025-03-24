@@ -2,7 +2,16 @@
 
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
-uses(TestCase::class, RefreshDatabase::class)->in(__DIR__);
+// Set database connection for testing
+DB::purge();
 
-// Helper functions are not needed as we're using $this in the test closures
+// Enable error reporting during tests
+uses(TestCase::class, RefreshDatabase::class)
+    ->beforeEach(function () {
+        // Restore error handlers that might be removed by test code
+        set_error_handler(null);
+        set_exception_handler(null);
+    })
+    ->in(__DIR__);
