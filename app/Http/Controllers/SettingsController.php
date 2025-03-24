@@ -32,6 +32,11 @@ class SettingsController extends Controller
             'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
         ]);
 
+        // If email is changing, set email_verified_at to null
+        if (isset($validated['email']) && $validated['email'] !== $user->email) {
+            $validated['email_verified_at'] = null;
+        }
+
         $user->update($validated);
 
         if ($request->wantsJson()) {

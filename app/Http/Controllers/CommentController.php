@@ -29,6 +29,11 @@ class CommentController extends Controller
      */
     public function store(Request $request, Post $post)
     {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
         $validated = $request->validate([
             'content' => 'required|string|max:10000',
             'parent_comment_id' => 'nullable|exists:comments,id',

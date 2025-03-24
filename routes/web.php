@@ -32,7 +32,7 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth', 'protect.superadmin'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -50,7 +50,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
     Route::delete('/settings/profile', [SettingsController::class, 'destroy'])->name('settings.profile.destroy');
     Route::get('/settings/password', [SettingsController::class, 'showPassword'])->name('settings.password');
-    Route::patch('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+    Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
 });
 
 // Performance dashboard routes

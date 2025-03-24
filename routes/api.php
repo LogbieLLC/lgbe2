@@ -54,8 +54,11 @@ Route::prefix('users/{user}')->group(function () {
 Route::prefix('posts/{post}')->group(function () {
     Route::post('/comments', [CommentController::class, 'store']);
     Route::get('/comments', [CommentController::class, 'index']);
-    Route::post('/vote', [PostController::class, 'vote']);
+    Route::post('/vote', [PostController::class, 'vote'])->middleware('auth:sanctum');
 });
+
+// Get post details with vote count
+Route::get('/posts/{post}', [PostController::class, 'show']);
 
 Route::prefix('comments/{comment}')->group(function () {
     Route::put('/', [CommentController::class, 'update']);

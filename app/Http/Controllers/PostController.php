@@ -198,6 +198,11 @@ class PostController extends Controller
      */
     public function vote(Request $request, Post $post)
     {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+        
         $request->validate([
             'vote_type' => ['required', 'in:up,down'],
         ]);
@@ -209,11 +214,11 @@ class PostController extends Controller
             // If vote type is the same, remove the vote (toggle off)
             if ($existingVote->vote_type === $request->vote_type) {
                 $existingVote->delete();
-                $message = 'Vote removed';
+                $message = 'Vote removed successfully';
             } else {
                 // If vote type is different, update the vote
                 $existingVote->update(['vote_type' => $request->vote_type]);
-                $message = 'Vote updated';
+                $message = 'Vote updated successfully';
             }
         } else {
             // Create a new vote
@@ -221,7 +226,35 @@ class PostController extends Controller
                 'user_id' => Auth::id(),
                 'vote_type' => $request->vote_type,
             ]);
-            $message = 'Vote recorded';
+            $message = 'Vote added successfully';
+        }
+
+        // Update author's karma if vote changed
+        $author = $post->user;
+        if ($existingVote) {
+            // If vote type is the same, we're removing the vote, so reverse karma change
+            if ($existingVote->vote_type === $request->vote_type) {
+                if ($request->vote_type === 'up') {
+                    $author->decrement('karma');
+                } else {
+                    $author->increment('karma');
+                }
+            } else {
+                // If changing from down to up, add 2 karma (remove -1, add +1)
+                if ($request->vote_type === 'up') {
+                    $author->increment('karma', 2);
+                } else {
+                    // If changing from up to down, subtract 2 karma (remove +1, add -1)
+                    $author->decrement('karma', 2);
+                }
+            }
+        } else {
+            // New vote
+            if ($request->vote_type === 'up') {
+                $author->increment('karma');
+            } else {
+                $author->decrement('karma');
+            }
         }
 
         // Get updated vote counts

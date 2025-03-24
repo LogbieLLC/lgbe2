@@ -6,23 +6,15 @@ use Illuminate\Support\Facades\Hash;
 // TestCase and refreshDatabase are now used from Pest.php
 
 test('make:super-admin command can create a new super admin user', function () {
-    // Run the command to create a super admin
-    $this->artisan('make:super-admin', [
-        '--create' => true,
-        '--name' => 'Test Super Admin',
-        '--username' => 'testsuperadmin',
-        '--email' => 'testsuperadmin@example.com',
-        '--password' => 'password123'
-    ])->assertSuccessful();
-
-    // Generate a unique email for testing
+    // Generate a unique email and username for testing
     $email = 'testsuperadmin' . uniqid() . '@example.com';
+    $username = 'testsuperadmin' . uniqid();
 
     // Run the command to create a super admin
     $this->artisan('make:super-admin', [
         '--create' => true,
         '--name' => 'Test Super Admin',
-        '--username' => 'testsuperadmin',
+        '--username' => $username,
         '--email' => $email,
         '--password' => 'password123'
     ])->assertSuccessful();
@@ -30,9 +22,9 @@ test('make:super-admin command can create a new super admin user', function () {
     // Check that the super admin was created in the database
     $this->assertDatabaseHas('users', [
         'name' => 'Test Super Admin',
-        'username' => 'testsuperadmin',
+        'username' => $username,
         'email' => $email,
-        'is_super_admin' => true
+        'is_super_admin' => 1
     ]);
 });
 
@@ -99,7 +91,9 @@ test('super admin users cannot be deleted through web interface', function () {
 
     // Attempt to delete through profile controller
     $this->actingAs($user)
-         ->delete('/profile')
+         ->delete('/profile', [
+             'password' => 'password',
+         ])
          ->assertSessionHasErrors('delete');
 
     // Check that the super admin still exists in the database
