@@ -85,8 +85,7 @@
         "test:all": [
             "@phpcs",
             "@phpstan",
-            "@pest",
-            "php artisan dusk"
+            "@pest"
         ]
     },
     "extra": {

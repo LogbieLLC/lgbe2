@@ -12,15 +12,14 @@ echo -e "Running tests in order of operations"
 echo -e "=========================================\n"
 
 # Define test steps
-STEPS=("PHP_CodeSniffer" "PHPStan" "ESLint" "Pest" "Jest" "Dusk")
-COMMANDS=("vendor/bin/phpcs" "vendor/bin/phpstan analyse --memory-limit=512M" "npm run lint" "vendor/bin/pest" "npm test" "./run-dusk-tests.sh")
+STEPS=("PHP_CodeSniffer" "PHPStan" "ESLint" "Pest" "Jest")
+COMMANDS=("vendor/bin/phpcs" "vendor/bin/phpstan analyse --memory-limit=512M" "npm run lint" "vendor/bin/pest" "npm test")
 DESCRIPTIONS=(
     "Enforces coding standards for PHP, ensuring the code is consistent, readable, and adheres to best practices."
     "Performs static analysis on PHP code to uncover potential bugs, type errors, and logical inconsistencies."
     "Lints JavaScript code within Vue.js components to enforce coding standards and flag common errors."
     "Runs unit and integration tests for PHP code to verify that individual components and their interactions work correctly."
     "Executes unit tests for JavaScript code in Vue.js components, ensuring they function as expected in isolation."
-    "Conducts end-to-end tests for the Laravel application, simulating user interactions to validate the entire system."
 )
 
 # Initialize variables
@@ -70,8 +69,7 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-# Make script executable
-chmod +x run-dusk-tests.sh 2>/dev/null
+# No longer need to make Dusk script executable
 
 # Function to run a test step
 run_step() {

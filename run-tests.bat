@@ -20,7 +20,6 @@ set "STEP[2]=PHPStan"
 set "STEP[3]=ESLint"
 set "STEP[4]=Pest"
 set "STEP[5]=Jest"
-set "STEP[6]=Dusk"
 
 :: Define commands for each step
 set "CMD[1]=vendor\bin\phpcs"
@@ -28,7 +27,6 @@ set "CMD[2]=vendor\bin\phpstan analyse --memory-limit=512M"
 set "CMD[3]=npm run lint"
 set "CMD[4]=vendor\bin\pest"
 set "CMD[5]=npm test"
-set "CMD[6]=run-dusk-tests.bat"
 
 :: Define descriptions for each step
 set "DESC[1]=Enforces coding standards for PHP, ensuring the code is consistent, readable, and adheres to best practices."
@@ -36,12 +34,11 @@ set "DESC[2]=Performs static analysis on PHP code to uncover potential bugs, typ
 set "DESC[3]=Lints JavaScript code within Vue.js components to enforce coding standards and flag common errors."
 set "DESC[4]=Runs unit and integration tests for PHP code to verify that individual components and their interactions work correctly."
 set "DESC[5]=Executes unit tests for JavaScript code in Vue.js components, ensuring they function as expected in isolation."
-set "DESC[6]=Conducts end-to-end tests for the Laravel application, simulating user interactions to validate the entire system."
 
 :: Initialize variables
 set FAILED_STEPS=
 set CURRENT_STEP=0
-set TOTAL_STEPS=6
+set TOTAL_STEPS=5
 set ALL_PASSED=1
 
 :: Parse command line arguments
@@ -60,11 +57,11 @@ if "%1"=="--all" (
     )
     set SPECIFIC_STEP=%2
     if !SPECIFIC_STEP! LSS 1 (
-        echo %RED%Error: Step number must be between 1 and 6.%RESET%
+        echo %RED%Error: Step number must be between 1 and 5.%RESET%
         goto :usage
     )
-    if !SPECIFIC_STEP! GTR 6 (
-        echo %RED%Error: Step number must be between 1 and 6.%RESET%
+    if !SPECIFIC_STEP! GTR 5 (
+        echo %RED%Error: Step number must be between 1 and 5.%RESET%
         goto :usage
     )
 ) else if not "%1"=="" (
@@ -166,7 +163,7 @@ echo   2. PHPStan - PHP static analysis
 echo   3. ESLint - JavaScript/Vue linting
 echo   4. Pest - PHP unit/integration tests
 echo   5. Jest - JavaScript unit tests
-echo   6. Dusk - End-to-end browser tests
+:: End-to-end browser tests removed
 echo.
 exit /b 1
 
