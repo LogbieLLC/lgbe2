@@ -60,8 +60,4 @@ parameters:
 			count: 1
 			path: app/Models/Vote.php
 
-		-
-			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
-			identifier: larastan.noEnvCallsOutsideOfConfig
-			count: 2
-			path: tests/DuskTestCase.php
+		# Removed Dusk-related PHPStan ignore
