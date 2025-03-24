@@ -67,6 +67,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'banned' => \App\Http\Middleware\CheckBanned::class,
         'performance.dashboard' => \App\Http\Middleware\PerformanceDashboardAccess::class,
-        'protect.superadmin' => \App\Http\Middleware\ProtectSuperAdminStatus::class,
+        'protect.superadmin' => \App\Http\Middleware\ProtectSuperAdmin::class,
     ];
 }
