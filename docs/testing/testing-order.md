@@ -34,11 +34,7 @@ To maintain a high-quality codebase, our testing process follows a deliberate se
 - **Configuration**: Jest configuration is defined in `jest.config.js`.
 - **Command**: `npm test`
 
-### 6. Dusk (PHP Laravel E2E)  
-- **Purpose**: Conducts end-to-end tests for the Laravel application, simulating user interactions to validate the entire system.  
-- **Why Here**: As the most resource-intensive step, it runs last to confirm full integration after all components are individually verified.
-- **Configuration**: Tests are located in `tests/Browser` directory. Firefox is used as the browser for testing.
-- **Command**: `php artisan dusk` or `run-dusk-tests.bat` (Windows) / `./run-dusk-tests.sh` (Unix)
+<!-- End-to-end testing section removed as part of Dusk removal -->
 
 ## Why This Order?
 
@@ -46,9 +42,7 @@ The sequence is optimized for efficiency and early error detection:
 
 1. **Static Checks First (Steps 1-3)**: Tools like PHP_CodeSniffer, PHPStan, and ESLint run quickly and don't require code execution. They catch code style violations and potential bugs in both PHP and JavaScript, preventing wasted time on tests if basic issues exist.
 
-2. **Component Testing Next (Steps 4-5)**: Pest and Jest verify the functionality of PHP and JavaScript components, respectively. These tests ensure individual pieces work before testing their integration.
-
-3. **Full-System Validation Last (Step 6)**: Dusk's end-to-end tests are slower and more complex, so they're reserved for the final stage, confirming the entire application works seamlessly.
+<!-- End-to-end testing reference removed as part of Dusk removal -->
 
 This approach—starting with fast, simple checks and ending with comprehensive tests—helps identify issues early, optimize resources, and maintain a reliable, well-tested codebase.
 
@@ -59,13 +53,10 @@ We provide scripts to run tests in the correct order:
 ### Windows
 
 ```bash
-# Run all tests except Dusk (E2E)
+# Run all tests
 .\run-tests.bat
 
-# Run all tests including Dusk
-.\run-tests.bat --all
-
-# Run a specific test step (1-6)
+# Run a specific test step (1-5)
 .\run-tests.bat --step 3  # Runs ESLint only
 
 # Continue running tests even if a step fails
@@ -78,13 +69,10 @@ We provide scripts to run tests in the correct order:
 # Make the script executable
 chmod +x run-tests.sh
 
-# Run all tests except Dusk (E2E)
+# Run all tests
 ./run-tests.sh
 
-# Run all tests including Dusk
-./run-tests.sh --all
-
-# Run a specific test step (1-6)
+# Run a specific test step (1-5)
 ./run-tests.sh --step 3  # Runs ESLint only
 
 # Continue running tests even if a step fails
@@ -95,4 +83,4 @@ chmod +x run-tests.sh
 
 Our GitHub Actions workflow runs tests in the same order. The workflow is defined in `.github/workflows/test-suite.yml`.
 
-By default, the CI pipeline runs steps 1-5 (excluding Dusk) to ensure fast feedback. Dusk tests can be enabled in the CI pipeline by uncommenting the relevant sections in the workflow file.
+By default, the CI pipeline runs all steps to ensure fast feedback.

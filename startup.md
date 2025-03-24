@@ -183,33 +183,7 @@ Run the PHP feature tests:
 php artisan test
 ```
 
-### End-to-End Tests with Laravel Dusk
-
-Prerequisites:
-1. Google Chrome installed
-2. Laravel Dusk installed and configured
-
-Run the end-to-end tests:
-
-On Windows:
-```bash
-run-dusk-tests.bat
-```
-
-On macOS/Linux:
-```bash
-./run-dusk-tests.sh
-```
-
-Alternatively, you can use the new cross-platform Python script:
-```bash
-python run-dusk-tests.py
-```
-
-Or manually:
-```bash
-php artisan dusk
-```
+<!-- End-to-end testing section removed -->
 
 ### Static Analysis with PHPStan
 
