@@ -16,17 +16,8 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Create SQLite database file if it doesn't exist
-        $databasePath = database_path('database.sqlite');
-        $databaseDir = dirname($databasePath);
-
-        if (!file_exists($databaseDir)) {
-            mkdir($databaseDir, 0777, true);
-        }
-
-        if (!file_exists($databasePath)) {
-            touch($databasePath);
-        }
+        // Mock Vite to prevent ViteManifestNotFoundException
+        $this->withoutVite();
 
         // Ensure config is bound for Laravel 11
         if (!$this->app->bound('config')) {
@@ -34,5 +25,18 @@ abstract class TestCase extends BaseTestCase
                 return new Repository();
             });
         }
+    }
+
+    /**
+     * Clean up after each test.
+     */
+    protected function tearDown(): void
+    {
+        // Clear application cache
+        if ($this->app) {
+            $this->artisan('cache:clear');
+        }
+        
+        parent::tearDown();
     }
 }

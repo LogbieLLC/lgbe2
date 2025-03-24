@@ -43,6 +43,15 @@ Route::get('/communities/create', [CommunityController::class, 'create'])->middl
 Route::post('/communities', [CommunityController::class, 'store'])->middleware(['auth'])->name('communities.store');
 Route::get('/communities/{community:slug}', [CommunityController::class, 'show'])->name('communities.show');
 
+// Settings routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/settings/profile', [SettingsController::class, 'showProfile'])->name('settings.profile');
+    Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::delete('/settings/profile', [SettingsController::class, 'destroy'])->name('settings.profile.destroy');
+    Route::get('/settings/password', [SettingsController::class, 'showPassword'])->name('settings.password');
+    Route::patch('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+});
+
 // Performance dashboard routes
 Route::middleware(['auth', 'performance.dashboard'])->prefix('performance')->group(function () {
     Route::get('/', [PerformanceDashboardController::class, 'index'])->name('performance.dashboard');

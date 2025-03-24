@@ -192,4 +192,46 @@ class PostController extends Controller
 
         return response()->json(['message' => 'Post removed successfully']);
     }
+
+    /**
+     * Vote on a post.
+     */
+    public function vote(Request $request, Post $post)
+    {
+        $request->validate([
+            'vote_type' => ['required', 'in:up,down'],
+        ]);
+
+        // Check if user has already voted on this post
+        $existingVote = $post->votes()->where('user_id', Auth::id())->first();
+
+        if ($existingVote) {
+            // If vote type is the same, remove the vote (toggle off)
+            if ($existingVote->vote_type === $request->vote_type) {
+                $existingVote->delete();
+                $message = 'Vote removed';
+            } else {
+                // If vote type is different, update the vote
+                $existingVote->update(['vote_type' => $request->vote_type]);
+                $message = 'Vote updated';
+            }
+        } else {
+            // Create a new vote
+            $post->votes()->create([
+                'user_id' => Auth::id(),
+                'vote_type' => $request->vote_type,
+            ]);
+            $message = 'Vote recorded';
+        }
+
+        // Get updated vote counts
+        $upvotes = $post->votes()->where('vote_type', 'up')->count();
+        $downvotes = $post->votes()->where('vote_type', 'down')->count();
+
+        return response()->json([
+            'message' => $message,
+            'upvotes' => $upvotes,
+            'downvotes' => $downvotes,
+        ]);
+    }
 }
