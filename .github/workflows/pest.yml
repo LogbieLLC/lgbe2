@@ -1,0 +1,63 @@
+name: Pest Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pest:
+    name: Pest PHP Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl, gd, exif, iconv
+        coverage: none
+    
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: |
+        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+    
+    - name: Install Dependencies
+      run: composer install --prefer-dist --no-progress && composer require --dev mockery/mockery
+    
+    - name: Dump Autoload
+      run: composer dump-autoload
+    
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    
+    - name: Generate Key
+      run: php artisan key:generate
+    
+    - name: Create Database
+      run: |
+        mkdir -p database
+        touch database/database.sqlite
+    
+    - name: Run Migrations
+      run: php artisan migrate --env=testing --database=sqlite --force
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+    
+    - name: Run Pest Tests
+      run: vendor/bin/pest
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
