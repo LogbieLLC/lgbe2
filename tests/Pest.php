@@ -16,10 +16,12 @@ declare(strict_types=1);
 uses(
     Tests\TestCase::class,
     Illuminate\Foundation\Testing\RefreshDatabase::class,
+    Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration::class,
 )->in('Feature');
 
 uses(
     Tests\TestCase::class,
+    Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration::class,
 )->in('Unit');
 
 /*

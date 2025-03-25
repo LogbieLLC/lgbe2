@@ -23,6 +23,7 @@
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.18",
         "laravel/sail": "^1.41",
+        "mockery/mockery": "^1.6",
         "nunomaduro/larastan": "^3.2",
         "pestphp/pest": "^3.7",
         "pestphp/pest-plugin": "^3.0",
