@@ -38,7 +38,8 @@ class MakeSuperAdmin extends Command
         } elseif ($this->option('email')) {
             $this->promoteSuperAdmin();
         } else {
-            $this->error('Please specify either --create to create a new super admin or --email to promote an existing user.');
+            $this->error('Please specify either --create to create a new super admin '
+                . 'or --email to promote an existing user.');
             return 1;
         }
 

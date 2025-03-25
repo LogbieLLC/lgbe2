@@ -48,7 +48,8 @@ class LoginRequest extends FormRequest
             // Check if super admin account is locked
             if ($user->locked_at) {
                 throw ValidationException::withMessages([
-                    'email' => 'This super admin account is locked. Please use the unlock:super-admin command to unlock it.',
+                    'email' => 'This super admin account is locked. Please use the unlock:super-admin command '
+                        . 'to unlock it.',
                 ]);
             }
 
@@ -64,7 +65,8 @@ class LoginRequest extends FormRequest
                     $user->save();
 
                     throw ValidationException::withMessages([
-                        'email' => 'This super admin account has been locked due to too many failed login attempts. Please use the unlock:super-admin command to unlock it.',
+                        'email' => 'This super admin account has been locked due to too many failed login attempts. '
+                            . 'Please use the unlock:super-admin command to unlock it.',
                     ]);
                 }
 

@@ -107,7 +107,7 @@ class AuthController extends Controller
         // For testing purposes, we'll just update the password directly
         // In a real app, this would verify the token and then reset the password
         $user = User::where('email', $request->email)->first();
-        
+
         if (!$user) {
             return response()->json([
                 'message' => 'User not found'

@@ -115,7 +115,10 @@ class CommunityController extends Controller
      */
     public function edit(Community $community)
     {
-        if (Auth::id() !== $community->created_by && !$community->moderators()->where('user_id', Auth::id())->exists()) {
+        if (
+            Auth::id() !== $community->created_by
+            && !$community->moderators()->where('user_id', Auth::id())->exists()
+        ) {
             abort(403, 'Unauthorized action');
         }
 
@@ -129,7 +132,10 @@ class CommunityController extends Controller
      */
     public function update(Request $request, Community $community)
     {
-        if (Auth::id() !== $community->created_by && !$community->moderators()->where('user_id', Auth::id())->exists()) {
+        if (
+            Auth::id() !== $community->created_by
+            && !$community->moderators()->where('user_id', Auth::id())->exists()
+        ) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized action'], 403);
             }
@@ -172,7 +178,7 @@ class CommunityController extends Controller
         return redirect()->route('communities.index')
             ->with('success', 'Community deleted successfully!');
     }
-    
+
     /**
      * Remove a post from a community.
      */
@@ -226,7 +232,7 @@ class CommunityController extends Controller
 
         return response()->json(['message' => 'Not a member of this community'], 409);
     }
-    
+
     /**
      * Get posts for a community.
      */
@@ -237,14 +243,14 @@ class CommunityController extends Controller
             ->with(['user', 'community'])
             ->withCount(['comments', 'votes'])
             ->get();
-            
+
         // Sort by score (upvotes - downvotes)
         $sortedPosts = $posts->sortByDesc(function ($post) {
             $upvotes = $post->votes()->where('vote_type', 'up')->count();
             $downvotes = $post->votes()->where('vote_type', 'down')->count();
             return $upvotes - $downvotes;
         })->values()->take(15);
-            
+
         return response()->json([
             'data' => $sortedPosts,
             'meta' => [
