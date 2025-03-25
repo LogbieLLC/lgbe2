@@ -36,10 +36,25 @@ jobs:
     - name: Install Dependencies
       run: composer install --prefer-dist --no-progress
     
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    
+    - name: Generate Key
+      run: php artisan key:generate
+    
     - name: Create Database
       run: |
+        mkdir -p database
         touch database/database.sqlite
-        php artisan migrate --env=testing
+    
+    - name: Run Migrations
+      run: php artisan migrate --env=testing --database=sqlite --force
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
     
     - name: Run Pest Tests
       run: vendor/bin/pest
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
