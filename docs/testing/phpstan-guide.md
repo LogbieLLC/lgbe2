@@ -1,4 +1,4 @@
-# PHPStan Setup for Laravel Project
+# PHPStan Guide for LGBE2
 
 This document explains how PHPStan is configured in this project and how to use it.
 
@@ -26,7 +26,7 @@ The PHPStan configuration is in the `phpstan.neon` file in the root of the proje
 
 3. **Analysis Level**: We're using level 5 (out of 9), which provides a good balance between strictness and practicality.
 
-4. **Paths to Analyze**: We analyze the `app` and `tests` directories, excluding `vendor`, `storage`, `bootstrap/cache`, and `tests/Browser`.
+4. **Paths to Analyze**: We analyze the `app` directory, excluding `vendor`, `storage`, and `bootstrap/cache`.
 
 5. **Laravel-specific Settings**:
    - `treatPhpDocTypesAsCertain: false`: This makes PHPStan less strict about PHPDoc types.
@@ -34,7 +34,7 @@ The PHPStan configuration is in the `phpstan.neon` file in the root of the proje
 
 6. **Ignored Errors**: We've configured PHPStan to ignore certain types of errors that are common in Laravel applications, such as:
    - Controller return type issues (JsonResponse vs Response)
-   - Test method issues (PHPUnit TestCase vs Laravel TestCase)
+   - Other specific issues that are known limitations
 
 ## Updating the Baseline
 
@@ -49,6 +49,29 @@ This will update the `phpstan-baseline.neon` file with the current state of erro
 ## Increasing the Analysis Level
 
 If you want to make PHPStan more strict, you can increase the level in the `phpstan.neon` file. The levels range from 0 (least strict) to 9 (most strict).
+
+## Known Limitations
+
+### Larastan Relation Detection
+
+Larastan (the Laravel-specific extension for PHPStan) has a known limitation where it cannot always properly detect Eloquent relationships even when they are correctly defined in the models. This can result in errors like:
+
+```
+Relation 'community' is not found in App\Models\Post model.
+Relation 'post' is not found in App\Models\Comment model.
+Relation 'user' is not found in App\Models\Comment model.
+Relation 'user' is not found in App\Models\Post model.
+```
+
+These errors occur in controllers or other classes that use these relationships, even though the relationships are properly defined in the model classes. This is a limitation of the static analysis rather than an actual code issue.
+
+The recommended approach is to add these errors to the baseline file using:
+
+```bash
+vendor/bin/phpstan analyse --generate-baseline --memory-limit=512M
+```
+
+This will ensure that PHPStan doesn't report these false positives while still catching other real issues.
 
 ## Adding Custom Rules
 

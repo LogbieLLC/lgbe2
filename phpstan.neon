@@ -6,7 +6,6 @@ parameters:
     level: 5
     paths:
         - app
-        - tests
     excludePaths:
         - vendor
         - storage
@@ -26,6 +25,5 @@ parameters:
         # Controller return type issues
         - '#Method App\\Http\\Controllers\\[a-zA-Z0-9\\_]+::[a-zA-Z0-9_]+\(\) should return Illuminate\\Http\\Response but returns Illuminate\\Http\\JsonResponse#'
         
-        # Test method issues
-        - '#Call to an undefined method PHPUnit\\Framework\\TestCase::[a-zA-Z0-9_]+\(\)#'
+        # Other issues
         - '#Cannot call method bans\(\) on object\|string#'
