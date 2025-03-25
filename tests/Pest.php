@@ -13,15 +13,14 @@ declare(strict_types=1);
 |
 */
 
-// Temporarily commented out until we resolve the TestCase class issue
-// uses(
-//     Tests\TestCase::class,
-//     // Illuminate\Foundation\Testing\RefreshDatabase::class,
-// )->in('Feature');
+uses(
+    Tests\TestCase::class,
+    Illuminate\Foundation\Testing\RefreshDatabase::class,
+)->in('Feature');
 
-// uses(
-//     Tests\TestCase::class,
-// )->in('Unit');
+uses(
+    Tests\TestCase::class,
+)->in('Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -52,4 +51,30 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+// Helper function to act as a user
+function actingAs($user)
+{
+    return test()->actingAs($user);
+}
+
+// Helper function to create a community with a member
+function createCommunityWithMember($user = null)
+{
+    $user = $user ?? \App\Models\User::factory()->create();
+    $community = \App\Models\Community::factory()->create();
+    $community->members()->attach($user->id, ['role' => 'member']);
+    
+    return [$community, $user];
+}
+
+// Helper function to create a community with a moderator
+function createCommunityWithModerator($user = null)
+{
+    $user = $user ?? \App\Models\User::factory()->create();
+    $community = \App\Models\Community::factory()->create();
+    $community->members()->attach($user->id, ['role' => 'moderator']);
+    
+    return [$community, $user];
 }
