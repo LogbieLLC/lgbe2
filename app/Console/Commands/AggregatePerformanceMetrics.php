@@ -14,7 +14,8 @@ class AggregatePerformanceMetrics extends Command
      *
      * @var string
      */
-    protected $signature = 'performance:aggregate {type=all : The type of aggregation to run (hourly, daily, weekly, monthly, all)}';
+    protected $signature = 'performance:aggregate {type=all : The type of aggregation to run '
+        . '(hourly, daily, weekly, monthly, all)}';
 
     /**
      * The console command description.

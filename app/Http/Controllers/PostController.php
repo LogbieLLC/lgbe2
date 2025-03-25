@@ -98,12 +98,12 @@ class PostController extends Controller
         if (Auth::check()) {
             $userVote = $post->votes()->where('user_id', Auth::id())->first();
         }
-        
+
         // Calculate vote count for API responses
         $upvotes = $post->votes()->where('vote_type', 'up')->count();
         $downvotes = $post->votes()->where('vote_type', 'down')->count();
         $voteCount = $upvotes - $downvotes;
-        
+
         // For API requests, return JSON
         if (request()->expectsJson()) {
             return response()->json([
@@ -212,7 +212,7 @@ class PostController extends Controller
 
         return response()->json(['message' => 'Post removed successfully']);
     }
-    
+
     /**
      * Vote on a post.
      */
@@ -222,7 +222,7 @@ class PostController extends Controller
         if (!Auth::check()) {
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
-        
+
         $request->validate([
             'vote_type' => ['required', 'in:up,down'],
         ]);

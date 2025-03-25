@@ -13,7 +13,8 @@ class UnlockSuperAdmin extends Command
      *
      * @var string
      */
-    protected $signature = 'unlock:super-admin {email : Email of the super admin to unlock} {--password= : New password for the super admin}';
+    protected $signature = 'unlock:super-admin {email : Email of the super admin to unlock} '
+        . '{--password= : New password for the super admin}';
 
     /**
      * The console command description.

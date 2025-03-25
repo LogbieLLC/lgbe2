@@ -277,9 +277,11 @@ class PerformanceDashboardController extends Controller
         $summary = "Over the past {$days} days, our site's performance has been ";
 
         if ($lcpStatus === 'good' && $clsStatus === 'good') {
-            $summary .= "strong, with both Largest Contentful Paint (LCP) and Cumulative Layout Shift (CLS) metrics meeting 'good' thresholds. ";
+            $summary .= "strong, with both Largest Contentful Paint (LCP) and Cumulative Layout Shift (CLS) "
+                . "metrics meeting 'good' thresholds. ";
         } elseif ($lcpStatus === 'poor' || $clsStatus === 'poor') {
-            $summary .= "concerning, with " . ($lcpStatus === 'poor' ? 'loading speed (LCP)' : '') .
+            $summary .= "concerning, with "
+                . ($lcpStatus === 'poor' ? 'loading speed (LCP)' : '') .
                         ($lcpStatus === 'poor' && $clsStatus === 'poor' ? ' and ' : '') .
                         ($clsStatus === 'poor' ? 'visual stability (CLS)' : '') . " not meeting acceptable thresholds. ";
         } else {
@@ -291,7 +293,8 @@ class PerformanceDashboardController extends Controller
             if ($lcpChange < 0) {
                 $summary .= "Loading performance has improved by " . abs($lcpChange) . "% compared to the previous period. ";
             } elseif ($lcpChange > 5) {
-                $summary .= "Loading performance has degraded by {$lcpChange}% compared to the previous period. ";
+                $summary .= "Loading performance has degraded by {$lcpChange}% compared to the previous "
+                    . "period. ";
             }
         }
 
@@ -305,8 +308,9 @@ class PerformanceDashboardController extends Controller
         if ($mobileData && $desktopData) {
             $mobileDesktopDiff = (($mobileData['value'] - $desktopData['value']) / $desktopData['value']) * 100;
             if ($mobileDesktopDiff > 20) {
-                $summary .= "Mobile performance is significantly worse than desktop, with mobile pages loading " .
-                            round($mobileDesktopDiff, 0) . "% slower. This represents an opportunity for optimization. ";
+                $summary .= "Mobile performance is significantly worse than desktop, with mobile pages "
+                    . "loading " . round($mobileDesktopDiff, 0)
+                    . "% slower. This represents an opportunity for optimization. ";
             }
         }
 

@@ -50,7 +50,7 @@ class SettingsController extends Controller
                 'user' => $user
             ]);
         }
-        
+
         return redirect('/settings/profile');
     }
 
@@ -84,7 +84,7 @@ class SettingsController extends Controller
                 'message' => 'Password updated successfully'
             ]);
         }
-        
+
         return redirect('/settings/password');
     }
 
