@@ -65,7 +65,7 @@ function createCommunityWithMember($user = null)
     $user = $user ?? \App\Models\User::factory()->create();
     $community = \App\Models\Community::factory()->create();
     $community->members()->attach($user->id, ['role' => 'member']);
-    
+
     return [$community, $user];
 }
 
@@ -75,6 +75,6 @@ function createCommunityWithModerator($user = null)
     $user = $user ?? \App\Models\User::factory()->create();
     $community = \App\Models\Community::factory()->create();
     $community->members()->attach($user->id, ['role' => 'moderator']);
-    
+
     return [$community, $user];
 }

@@ -7,7 +7,7 @@ use App\Models\Comment;
 test('user can comment on a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     $response = actingAs($user)
         ->postJson("/api/posts/{$post->id}/comments", [
             'content' => 'This is a test comment'
@@ -36,7 +36,7 @@ test('user can reply to a comment', function () {
     $parentComment = Comment::factory()->create([
         'post_id' => $post->id
     ]);
-    
+
     $response = actingAs($user)
         ->postJson("/api/posts/{$post->id}/comments", [
             'content' => 'This is a reply',
@@ -69,7 +69,7 @@ test('user can delete their own comment', function () {
         'post_id' => $post->id,
         'user_id' => $user->id
     ]);
-    
+
     $response = actingAs($user)
         ->deleteJson("/api/comments/{$comment->id}");
 
@@ -89,7 +89,7 @@ test('user cannot delete another user\'s comment', function () {
         'post_id' => $post->id,
         'user_id' => $otherUser->id
     ]);
-    
+
     $response = actingAs($user)
         ->deleteJson("/api/comments/{$comment->id}");
 

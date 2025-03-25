@@ -7,12 +7,12 @@ use App\Models\Comment;
 
 test('user can search communities', function () {
     $user = User::factory()->create();
-    
+
     // Create test communities
     Community::factory()->create(['name' => 'Test Community']);
     Community::factory()->create(['name' => 'Another Community']);
     Community::factory()->create(['name' => 'Different Name']);
-    
+
     $response = actingAs($user)
         ->getJson('/api/search/communities?q=Test');
 
@@ -23,12 +23,12 @@ test('user can search communities', function () {
 
 test('user can search posts across all communities', function () {
     $user = User::factory()->create();
-    
+
     // Create test posts
     Post::factory()->create(['title' => 'Test Post Title']);
     Post::factory()->create(['title' => 'Another Post']);
     Post::factory()->create(['title' => 'Different Title']);
-    
+
     $response = actingAs($user)
         ->getJson('/api/search/posts?q=Test');
 
@@ -40,18 +40,18 @@ test('user can search posts across all communities', function () {
 test('user can search posts within a specific community', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     // Create test posts in the community
     Post::factory()->create([
         'title' => 'Test Post in Community',
         'community_id' => $community->id
     ]);
-    
+
     // Create test posts in other communities
     Post::factory()->create([
         'title' => 'Test Post in Other Community'
     ]);
-    
+
     $response = actingAs($user)
         ->getJson("/api/search/posts?community_id={$community->id}&q=Test");
 
@@ -62,10 +62,10 @@ test('user can search posts within a specific community', function () {
 
 test('search returns empty results when no matches found', function () {
     $user = User::factory()->create();
-    
+
     // Create some posts
     Post::factory()->count(3)->create();
-    
+
     $response = actingAs($user)
         ->getJson('/api/search/posts?q=NonExistentTerm');
 
@@ -75,14 +75,14 @@ test('search returns empty results when no matches found', function () {
 
 test('search results are paginated', function () {
     $user = User::factory()->create();
-    
+
     // Create many posts with the same search term
     for ($i = 1; $i <= 15; $i++) {
         Post::factory()->create([
             'title' => "Test Post {$i}"
         ]);
     }
-    
+
     $response = actingAs($user)
         ->getJson('/api/search/posts?q=Test&page=1&per_page=10');
 
@@ -98,7 +98,7 @@ test('search results are paginated', function () {
                 'total'
             ]
         ]);
-    
+
     $this->assertEquals(1, $response->json('meta.current_page'));
     $this->assertEquals(2, $response->json('meta.last_page'));
     $this->assertEquals(10, $response->json('meta.per_page'));

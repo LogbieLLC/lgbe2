@@ -8,7 +8,7 @@ use App\Models\Vote;
 test('user can upvote a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     $response = actingAs($user)
         ->postJson("/api/posts/{$post->id}/vote", [
             'vote_type' => 'up'
@@ -28,7 +28,7 @@ test('user can upvote a post', function () {
 test('user can downvote a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     $response = actingAs($user)
         ->postJson("/api/posts/{$post->id}/vote", [
             'vote_type' => 'down'
@@ -48,7 +48,7 @@ test('user can downvote a post', function () {
 test('user can change their vote on a post', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create();
-    
+
     // First vote up
     actingAs($user)
         ->postJson("/api/posts/{$post->id}/vote", [
@@ -75,7 +75,7 @@ test('user can change their vote on a post', function () {
 test('user can upvote a comment', function () {
     $user = User::factory()->create();
     $comment = Comment::factory()->create();
-    
+
     $response = actingAs($user)
         ->postJson("/api/comments/{$comment->id}/vote", [
             'vote_type' => 'up'
@@ -98,19 +98,19 @@ test('user can upvote a comment', function () {
 test('karma is updated correctly when post is upvoted', function () {
     $postAuthor = User::factory()->create(['karma' => 0]);
     $voter = User::factory()->create();
-    
+
     $post = Post::factory()->create([
         'user_id' => $postAuthor->id
     ]);
-    
+
     $initialKarma = $postAuthor->karma;
-    
+
     // Upvote the post
     actingAs($voter)
         ->postJson("/api/posts/{$post->id}/vote", [
             'vote_type' => 'up'
         ]);
-        
+
     $postAuthor->refresh();
     $this->assertEquals($initialKarma + 1, $postAuthor->karma);
 });

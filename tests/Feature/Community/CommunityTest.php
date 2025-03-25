@@ -5,7 +5,7 @@ use App\Models\Community;
 
 test('user can create a community', function () {
     $user = User::factory()->create();
-    
+
     $response = actingAs($user)
         ->postJson('/api/communities', [
             'name' => 'testcommunity',
@@ -38,7 +38,7 @@ test('user can create a community', function () {
 
 test('user cannot create community with invalid data', function () {
     $user = User::factory()->create();
-    
+
     $response = actingAs($user)
         ->postJson('/api/communities', [
             'name' => 't', // Too short
@@ -52,7 +52,7 @@ test('user cannot create community with invalid data', function () {
 test('user can join a community', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     $response = actingAs($user)
         ->postJson("/api/communities/{$community->id}/join");
 
@@ -69,7 +69,7 @@ test('user can join a community', function () {
 test('user cannot join same community twice', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     // First join
     actingAs($user)
         ->postJson("/api/communities/{$community->id}/join");
@@ -104,7 +104,7 @@ test('moderator can update community rules', function () {
 test('non-moderator cannot update community rules', function () {
     $user = User::factory()->create();
     $community = Community::factory()->create();
-    
+
     $response = actingAs($user)
         ->putJson("/api/communities/{$community->id}", [
             'description' => 'Updated community description',
