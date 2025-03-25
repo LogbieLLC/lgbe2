@@ -1,4 +1,4 @@
-# lgbe2 - Social Media Platform
+# LGBE2 - Social Media Platform
 
 A Reddit-like social media platform built with Laravel and Vue.js.
 
@@ -12,6 +12,16 @@ A Reddit-like social media platform built with Laravel and Vue.js.
 - User profiles
 - Search functionality
 
+## Documentation
+
+Comprehensive documentation is available in the [docs](docs/) directory:
+
+- [Project Overview](docs/project-overview.md)
+- [Getting Started](docs/getting-started/setup-guide.md)
+- [Architecture](docs/architecture/specifications.md)
+- [Features](docs/features/)
+- [Testing](docs/testing/)
+
 ## Testing
 
 ### Static Analysis with PHPStan
@@ -22,7 +32,7 @@ The project uses PHPStan for static code analysis to catch potential bugs and er
 composer phpstan
 ```
 
-For more information about the PHPStan configuration, see [phpstan-readme.md](phpstan-readme.md).
+For more information about the PHPStan configuration, see [PHPStan Guide](docs/testing/phpstan-guide.md).
 
 ### Feature Tests
 
@@ -31,8 +41,6 @@ The application includes feature tests for various components:
 ```bash
 php artisan test
 ```
-
-<!-- End-to-end testing section removed -->
 
 ## Development
 
@@ -44,6 +52,8 @@ php artisan test
 - MySQL or SQLite
 
 ### Setup
+
+For detailed setup instructions, see the [Setup Guide](docs/getting-started/setup-guide.md).
 
 1. Clone the repository
 2. Install PHP dependencies: `composer install`

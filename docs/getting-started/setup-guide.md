@@ -1,4 +1,4 @@
-# LGBE2 - Social Media Platform Startup Guide
+# LGBE2 - Setup Guide
 
 This document provides comprehensive instructions for setting up and running the LGBE2 social media platform application.
 
@@ -122,7 +122,7 @@ npm run dev
 
 This will start the Vite development server with hot module replacement for Vue.js components.
 
-Alternatively, you can use the new Python script:
+Alternatively, you can use the Python script:
 ```bash
 python startup.py
 ```
@@ -183,13 +183,13 @@ Run the PHP feature tests:
 php artisan test
 ```
 
-<!-- End-to-end testing section removed -->
-
 ### Static Analysis with PHPStan
 
 ```bash
 composer phpstan
 ```
+
+For more information about PHPStan, see the [PHPStan Guide](../testing/phpstan-guide.md).
 
 ## Troubleshooting
 
@@ -219,8 +219,6 @@ npm install
 # Rebuild assets
 npm run dev
 ```
-
-<!-- Laravel Dusk Testing section removed -->
 
 ### General Troubleshooting
 

@@ -1,7 +1,6 @@
 <?php
 
-it('returns a successful response', function () {
-    $response = $this->get('/');
-
-    $response->assertStatus(200);
+test('the welcome page loads successfully', function () {
+    $this->get('/')
+         ->assertStatus(200);
 });
