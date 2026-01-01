@@ -37,6 +37,6 @@
         "tailwind-merge": "^3.0.2",
         "tailwindcss-animate": "^1.0.7",
         "web-vitals": "^3.5.0",
-        "ziggy-js": "^2.5.2"
+        "ziggy-js": "^2.6.0"
     }
 }
